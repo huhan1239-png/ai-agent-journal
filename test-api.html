@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API 测试页面</h1>
+    <div id="result"></div>
+
+    <script>
+        const API_BASE_URL = window.location.origin;
+
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>测试中...</p>';
+
+            try {
+                // 测试登录 API
+                const response = await fetch(`${API_BASE_URL}/api/auth`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'login',
+                        username: 'test',
+                        password: 'test123'
+                    })
+                });
+
+                const data = await response.json();
+
+                resultDiv.innerHTML = `
+                    <h2>测试结果：</h2>
+                    <p><strong>状态码:</strong> ${response.status}</p>
+                    <p><strong>响应:</strong></p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                    <p><strong>API URL:</strong> ${API_BASE_URL}/api/auth</p>
+                `;
+
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h2>错误：</h2>
+                    <p style="color: red;">${error.message}</p>
+                    <p><strong>API URL:</strong> ${API_BASE_URL}/api/auth</p>
+                `;
+            }
+        }
+
+        // 页面加载后自动测试
+        window.onload = testAPI;
+    </script>
+</body>
+</html>
