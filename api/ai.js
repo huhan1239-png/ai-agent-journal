@@ -421,6 +421,54 @@ ${entries.slice(0, 10).map((entry, index) =>
   });
 }
 
+// 功能4：生成标题
+async function generateTitle(req, res, decoded) {
+  const { description, provider } = req.body;
+
+  if (!description) {
+    return res.status(400).json({ error: '请提供描述内容' });
+  }
+
+  const keyInfo = await getUserApiKey(decoded.userId, provider);
+  if (!keyInfo) {
+    return res.status(400).json({ error: '请先在设置中配置 API Key' });
+  }
+
+  const prompt = `你是一个专业的标题提炼专家。请根据下面的工作日志内容，提炼出一个精准的任务标题。
+
+【核心要求】
+1. 标题长度：严格控制在50个汉字以内
+2. 结构规范：必须使用"动词+对象"结构，禁止使用完整句子
+3. 内容要求：提炼核心动作和关键对象，去除所有过程描述和细节
+4. 输出格式：只输出标题本身，不要引号、不要标点、不要任何额外说明
+5. 禁止行为：严禁直接复制原文，必须进行高度概括和提炼
+
+现在请提炼以下日志的标题：
+
+${description}
+
+请输出标题（不超过50个汉字）：`;
+
+  const rawTitle = await callAI(keyInfo.provider, keyInfo.apiKey, prompt, 150);
+
+  // 清理标题格式
+  let title = rawTitle.trim();
+  title = title.replace(/^["「『：:]+|["」』]+$/g, '').trim();
+  title = title.replace(/^(标题|任务|输出)[：:]\s*/g, '').trim();
+
+  // 确保标题长度
+  const chineseChars = title.match(/[\u4e00-\u9fa5]/g) || [];
+  if (chineseChars.length > 50) {
+    title = chineseChars.slice(0, 50).join('');
+  }
+
+  return res.status(200).json({
+    success: true,
+    title: title,
+    usedProvider: keyInfo.provider
+  });
+}
+
 module.exports = async function handler(req, res) {
   // 设置 CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -455,6 +503,8 @@ module.exports = async function handler(req, res) {
         return await generateReport(req, res, decoded);
       case 'analyze':
         return await analyzeWork(req, res, decoded);
+      case 'generate-title':
+        return await generateTitle(req, res, decoded);
       default:
         return res.status(400).json({ error: '无效的操作类型' });
     }

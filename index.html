@@ -521,54 +521,6 @@
             box-shadow: none;
         }
 
-        .api-config {
-            background: rgba(0, 113, 227, 0.05);
-            padding: 16px;
-            border-radius: 10px;
-            margin-bottom: 24px;
-            border: 1px solid rgba(0, 113, 227, 0.2);
-        }
-
-        .api-config-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .api-config-header h4 {
-            font-size: 15px;
-            font-weight: 600;
-            color: #1d1d1f;
-        }
-
-        .api-config-toggle {
-            background: transparent;
-            border: none;
-            color: #0071e3;
-            font-size: 13px;
-            cursor: pointer;
-            font-weight: 500;
-        }
-
-        .api-config-content {
-            display: none;
-        }
-
-        .api-config-content.show {
-            display: block;
-        }
-
-        .api-input-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .api-input-group input {
-            flex: 1;
-        }
-
         .entries-list {
             margin-top: 20px;
         }
@@ -762,18 +714,6 @@
 
         .empty-state p {
             font-size: 17px;
-        }
-
-        .ai-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-left: 8px;
-            vertical-align: middle;
         }
 
         @media (max-width: 768px) {
@@ -1194,27 +1134,6 @@
         <div id="record" class="tab-content active">
             <h2>添加记录</h2>
 
-            <!-- API配置区域 -->
-            <div class="api-config">
-                <div class="api-config-header">
-                    <h4>🤖 AI智能提取 <span class="ai-badge">Beta</span></h4>
-                    <button class="api-config-toggle" onclick="toggleApiConfig()">配置</button>
-                </div>
-                <div class="api-config-content" id="apiConfigContent">
-                    <p style="font-size: 13px; color: #6e6e73; margin-bottom: 10px;">
-                        配置Claude API密钥后，AI将自动从详细内容中提取任务描述
-                    </p>
-                    <div class="api-input-group">
-                        <input type="password" id="apiKey" placeholder="sk-ant-api..."
-                               style="font-size: 13px;">
-                        <button class="btn" onclick="saveApiKey()">保存</button>
-                    </div>
-                    <p style="font-size: 12px; color: #86868b; margin-top: 8px;">
-                        密钥仅保存在本地浏览器，不会上传到任何服务器
-                    </p>
-                </div>
-            </div>
-
             <form id="entryForm">
                 <div class="form-row">
                     <div class="form-group">
@@ -1255,8 +1174,8 @@
                     <label>任务标题 <span style="color: #86868b; font-size: 13px; font-weight: 400;">(AI生成后可手动修改)</span></label>
                     <div style="display: flex; gap: 10px;">
                         <input type="text" id="entryTask" placeholder="点击右侧按钮生成标题，或手动输入..." required style="flex: 1;">
-                        <button type="button" class="btn" id="generateTitleBtn" onclick="generateTitle()" style="min-width: 120px;">
-                            生成标题
+                        <button type="button" class="btn" id="generateTitleBtn" onclick="generateTitle()" style="min-width: 120px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            ✨ 生成标题
                         </button>
                     </div>
                 </div>

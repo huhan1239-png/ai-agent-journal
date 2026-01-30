@@ -1,5 +1,199 @@
 # 📋 AI Agent Journal 更新日志
 
+## 🎨 Version 2.1.0 - AI多模型支持与UI优化 (2026-01-31)
+
+### 🚀 重大更新
+
+#### AI 多模型支持
+- **新功能**：支持5个AI模型，用户可自由选择
+  - Claude (Anthropic) - claude-3-5-sonnet
+  - ChatGPT (OpenAI) - gpt-4-turbo-preview
+  - Gemini (Google) - gemini-pro
+  - Ollama (本地) - llama2 等本地模型
+  - DeepSeek - deepseek-chat
+
+#### 统一的 AI 设置中心
+- **新页面**：`ai-settings.html` - 集中管理所有AI模型配置
+- **功能**：
+  - 下拉选择器切换不同AI提供商
+  - 每个模型显示独立的配置说明和获取API Key步骤
+  - 可同时配置多个AI模型
+  - 显示已配置模型列表，带彩色徽章标识
+  - 独立删除功能
+- **API Key 安全**：所有密钥使用AES加密存储在云端数据库
+
+### ✨ UI/UX 优化
+
+#### 1. 移除AI智能提取功能
+- **改进**：删除"添加记录"页面顶部的"AI智能提取"配置区域
+- **原因**：
+  - 旧功能使用localStorage存储API Key，不安全
+  - 与新的多模型架构不兼容
+  - 用户体验不佳，配置过于复杂
+
+#### 2. 统一AI按钮视觉样式
+- **改进**："生成标题"按钮采用与"AI辅助"按钮相同的渐变紫色样式
+- **设计**：
+  - 背景：`linear-gradient(135deg, #667eea 0%, #764ba2 100%)`
+  - 图标：✨ sparkles emoji
+  - 效果：视觉一致性更好，用户能快速识别AI功能
+
+#### 3. 生成标题功能升级
+- **改进**：接入多模型后端API
+- **变化前**：直接在前端调用Claude API，需要本地配置API Key
+- **变化后**：调用后端 `/api/ai` 的 `generate-title` action
+- **优势**：
+  - 支持多种AI模型
+  - 与其他AI功能（AI辅助、生成周报、工作分析）使用同一套配置
+  - 更安全（API Key不在前端暴露）
+  - 更灵活（可随时切换模型）
+
+### 🔧 技术改进
+
+#### 后端API扩展
+- **新增**：`POST /api/ai` 的 `generate-title` action
+- **功能**：基于工作描述智能生成任务标题
+- **特点**：
+  - 支持所有已配置的AI模型
+  - 自动选择用户最近配置的模型（或指定provider）
+  - 标题长度严格控制在50个汉字以内
+  - 智能清理格式（去除引号、标点等）
+
+#### API整合优化
+- **改进**：Gemini API模型名称修复
+- **修复历程**：
+  - 尝试1：`gemini-1.5-flash` (v1) ❌
+  - 尝试2：`gemini-1.5-flash-latest` (v1beta) ❌
+  - 最终：`gemini-pro` (v1beta) ✅
+- **结果**：Gemini API现在可以正常工作
+
+#### 前端代码清理
+- **删除**：`extractTaskFromDescription()` 函数（76行废弃代码）
+- **原因**：已被新的后端API替代，不再需要前端直接调用Claude API
+
+### 📦 数据库更新
+
+#### 新增表：user_api_keys
+```sql
+CREATE TABLE user_api_keys (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    api_key_encrypted TEXT NOT NULL,
+    provider VARCHAR(50) DEFAULT 'anthropic',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, provider)
+);
+```
+
+- **字段说明**：
+  - `api_key_encrypted`：AES加密的API密钥
+  - `provider`：AI提供商标识（anthropic/openai/google/ollama/deepseek）
+  - 唯一约束：每个用户每个提供商只能有一个API Key
+
+### 🔒 安全增强
+
+1. **API Key 加密存储**
+   - 使用AES-256-CBC加密
+   - 加密密钥存储在环境变量中
+   - 从不在前端直接存储或传输明文API Key
+
+2. **密钥验证**
+   - 不同提供商使用不同的格式验证规则
+   - Claude: `sk-ant-*`
+   - OpenAI/DeepSeek: `sk-*`
+   - Gemini: `AIzaSy*`
+   - Ollama: URL格式验证
+
+### 📚 新增文档
+
+1. **AI_FEATURES_GUIDE.md**
+   - AI功能使用指南
+   - 各个AI模型的特点对比
+   - API获取方法
+
+2. **MULTI_MODEL_GUIDE.md**
+   - 多模型支持的实现指南
+   - 前后端API文档
+   - 配置和测试方法
+
+3. **DATABASE_MIGRATION_API_KEYS.md**
+   - 数据库迁移SQL脚本
+   - user_api_keys表结构说明
+
+### 🐛 Bug 修复
+
+#### 修复1：Gemini API模型兼容性
+- **问题**：Gemini API返回"model not found"错误
+- **尝试**：测试了多个模型名称和API版本
+- **解决方案**：使用 `gemini-pro` 模型 + `v1beta` API版本
+- **状态**：✅ 已修复
+
+#### 修复2：DeepSeek余额不足错误处理
+- **问题**："Insufficient Balance"错误
+- **说明**：这不是代码问题，是用户账户余额不足
+- **改进**：错误信息更清晰，提示用户充值
+
+### 🔄 API 变更
+
+#### 新增端点
+- `POST /api/ai?action=generate-title` - 生成任务标题
+- `POST /api/settings` - 保存AI模型API Key
+- `GET /api/settings?action=list` - 获取已配置的AI模型列表
+- `GET /api/settings?provider=xxx` - 获取特定模型的API Key（部分隐藏）
+- `DELETE /api/settings?provider=xxx` - 删除特定模型的API Key
+
+#### 修改端点
+- `/api/ai` 的所有action现在都支持 `provider` 参数
+- 如果不指定provider，自动使用最近配置的模型
+
+### 📱 用户体验改进
+
+1. **AI设置页面**
+   - 响应式设计，移动端友好
+   - 彩色徽章区分不同AI模型
+   - 实时显示配置状态
+   - 清晰的步骤指引
+
+2. **按钮样式统一**
+   - 所有AI功能按钮使用相同的渐变紫色
+   - 添加sparkles图标增强视觉识别
+   - hover效果优化
+
+3. **错误提示优化**
+   - 更清晰的错误信息
+   - 区分配置错误和余额不足等不同场景
+
+### ⚠️ 破坏性变更
+
+#### localStorage API Key 不再支持
+- **影响**：旧版本在localStorage中存储的Claude API Key将不再使用
+- **迁移**：
+  1. 访问新的AI设置页面
+  2. 重新配置你的AI模型API Key
+  3. API Key将安全地存储在云端数据库中
+
+### 🎯 性能优化
+
+1. **减少前端代码体积**
+   - 删除76行废弃的AI调用代码
+   - 移除不再使用的CSS样式
+
+2. **API调用优化**
+   - 统一的AI调用接口
+   - 减少重复代码
+   - 更好的错误处理
+
+### 🚀 下一步计划
+
+#### 即将推出（下个版本）
+- [ ] AI设置页面UI进一步优化
+- [ ] 支持为不同AI功能指定不同的默认模型
+- [ ] AI使用统计和成本追踪
+- [ ] 更多AI模型支持（Anthropic Claude 3 Opus, GPT-4等）
+
+---
+
 ## 🎉 Version 2.0.0 - 云端数据库版本 (2026-01-30)
 
 ### 🚀 重大更新

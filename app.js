@@ -486,10 +486,28 @@ async function generateTitle() {
     generateBtn.textContent = '生成中...';
 
     try {
-        const title = await extractTaskFromDescription(description);
-        document.getElementById('entryTask').value = title;
+        const token = getToken();
+        const response = await fetch(`${API_BASE_URL}/api/ai`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                token: token,
+                action: 'generate-title',
+                description: description
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || '标题生成失败');
+        }
+
+        document.getElementById('entryTask').value = data.title;
     } catch (error) {
-        alert('标题生成失败，请手动输入或重试');
+        alert(error.message || '标题生成失败，请手动输入或重试');
         console.error(error);
     } finally {
         generateBtn.disabled = false;
@@ -497,82 +515,6 @@ async function generateTitle() {
     }
 }
 
-// AI提取任务描述
-async function extractTaskFromDescription(description) {
-    const apiKey = localStorage.getItem('claudeApiKey');
-    if (!apiKey) {
-        const chineseChars = description.match(/[\u4e00-\u9fa5]/g) || [];
-        if (chineseChars.length > 50) {
-            return chineseChars.slice(0, 50).join('') + '...';
-        }
-        return description.substring(0, 50) + (description.length > 50 ? '...' : '');
-    }
-
-    try {
-        const response = await fetch('https://api.anthropic.com/v1/messages', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'x-api-key': apiKey,
-                'anthropic-version': '2023-06-01'
-            },
-            body: JSON.stringify({
-                model: 'claude-3-haiku-20240307',
-                max_tokens: 150,
-                messages: [{
-                    role: 'user',
-                    content: `你是一个专业的标题提炼专家。请根据下面的工作日志内容，提炼出一个精准的任务标题。
-
-【核心要求】
-1. 标题长度：严格控制在50个汉字以内
-2. 结构规范：必须使用"动词+对象"结构，禁止使用完整句子
-3. 内容要求：提炼核心动作和关键对象，去除所有过程描述和细节
-4. 输出格式：只输出标题本身，不要引号、不要标点、不要任何额外说明
-5. 禁止行为：严禁直接复制原文，必须进行高度概括和提炼
-
-现在请提炼以下日志的标题：
-
-${description}
-
-请输出标题（不超过50个汉字）：`
-                }]
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error('API调用失败');
-        }
-
-        const data = await response.json();
-        let title = data.content[0].text.trim();
-
-        title = title.replace(/^["「『：:]+|["」』]+$/g, '').trim();
-        title = title.replace(/^(标题|任务|输出)[：:]\s*/g, '').trim();
-
-        const chineseChars = title.match(/[\u4e00-\u9fa5]/g) || [];
-        if (chineseChars.length > 50) {
-            let count = 0;
-            let result = '';
-            for (let char of title) {
-                if (/[\u4e00-\u9fa5]/.test(char)) {
-                    count++;
-                    if (count > 50) break;
-                }
-                result += char;
-            }
-            title = result;
-        }
-
-        return title;
-    } catch (error) {
-        console.error('AI提取失败:', error);
-        const chineseChars = description.match(/[\u4e00-\u9fa5]/g) || [];
-        if (chineseChars.length > 50) {
-            return chineseChars.slice(0, 50).join('') + '...';
-        }
-        return description.substring(0, 50) + (description.length > 50 ? '...' : '');
-    }
-}
 
 // 表单提交
 document.getElementById('entryForm').addEventListener('submit', async function(e) {
