@@ -1,7 +1,7 @@
 {
-  "name": "ai-agent-journal",
+  "name": "space-ai-agent-journal",
   "version": "1.0.0",
-  "description": "AI Agent 使用日志系统",
+  "description": "空间智能部-Agent实战之路",
   "main": "index.html",
   "scripts": {
     "dev": "vercel dev",

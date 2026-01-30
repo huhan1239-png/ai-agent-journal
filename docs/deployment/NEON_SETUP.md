@@ -84,7 +84,7 @@ ON CONFLICT (username) DO NOTHING;
 {
   "name": "ai-agent-journal",
   "version": "1.0.0",
-  "description": "AI Agent 使用日志系统",
+  "description": "空间智能部-Agent实战之路系统",
   "scripts": {
     "dev": "vercel dev",
     "deploy": "vercel --prod"

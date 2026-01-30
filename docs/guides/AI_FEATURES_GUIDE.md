@@ -13,7 +13,7 @@
 
 ## 功能概述
 
-AI Agent Journal 集成了 Claude AI（Anthropic）的强大能力，提供以下智能功能：
+空间智能部-Agent实战之路 集成了 Claude AI（Anthropic）的强大能力，提供以下智能功能：
 
 | 功能 | 说明 | 使用场景 |
 |------|------|---------|
@@ -46,7 +46,7 @@ AI Agent Journal 集成了 Claude AI（Anthropic）的强大能力，提供以�
 
 ### 步骤 2：在系统中配置
 
-1. **登录 AI Agent Journal**
+1. **登录 空间智能部-Agent实战之路**
    - 使用你的用户名和密码登录
 
 2. **进入 AI 设置**

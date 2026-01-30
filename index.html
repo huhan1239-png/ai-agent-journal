@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>AI Agent 使用日志</title>
+    <title>空间智能部-Agent实战之路</title>
     <style>
         * {
             margin: 0;
@@ -1049,7 +1049,7 @@
     <!-- 登录/注册界面 -->
     <div class="auth-container active" id="authContainer">
         <div class="auth-box">
-            <h1>🤖 AI Agent 使用日志</h1>
+            <h1>🤖 空间智能部-Agent实战之路</h1>
             <p class="subtitle">记录每天的AI使用情况，智能生成周报</p>
 
             <div class="auth-tabs">
@@ -1100,7 +1100,7 @@
 
     <div class="container">
         <header>
-            <h1>🤖 AI Agent 使用日志</h1>
+            <h1>🤖 空间智能部-Agent实战之路</h1>
             <p>记录每天的AI使用情况，智能生成周报</p>
             <div class="user-info">
                 <span class="username-badge" id="usernameBadge"></span>
@@ -1213,7 +1213,7 @@
         <!-- 页脚 -->
         <footer>
             <p>Made with ❤️ by AI Agent</p>
-            <a class="changelog-link" onclick="showChangelog()">📋 查看升级日志 v1.10</a>
+            <a class="changelog-link" onclick="showChangelog()">📋 查看升级日志 v2.1.0</a>
         </footer>
     </div>
 
@@ -1227,8 +1227,38 @@
             <div class="modal-body">
                 <div class="changelog-item">
                     <div class="changelog-version">
-                        <h4>v1.10</h4>
+                        <h4>v2.1.0</h4>
                         <span class="version-badge">最新</span>
+                    </div>
+                    <div class="changelog-date">2026年1月31日</div>
+                    <ul class="changelog-features">
+                        <li><strong>多AI模型支持</strong>：支持5种主流AI模型（Claude、ChatGPT、Gemini、Ollama、DeepSeek），用户可自由选择</li>
+                        <li><strong>统一AI设置中心</strong>：新增ai-settings.html页面，集中管理所有AI模型配置，支持同时配置多个模型</li>
+                        <li><strong>UI优化</strong>：移除AI智能提取区域，统一所有AI按钮为渐变紫色样式，视觉一致性更好</li>
+                        <li><strong>生成标题升级</strong>：接入多模型后端API，支持所有已配置的AI模型生成标题</li>
+                        <li><strong>安全增强</strong>：API Key使用AES-256-CBC加密存储在云端数据库，不同提供商使用不同格式验证</li>
+                        <li><strong>Bug修复</strong>：修复Gemini API模型兼容性问题，使用gemini-pro模型</li>
+                    </ul>
+                </div>
+
+                <div class="changelog-item">
+                    <div class="changelog-version">
+                        <h4>v2.0.0</h4>
+                    </div>
+                    <div class="changelog-date">2026年1月30日</div>
+                    <ul class="changelog-features">
+                        <li><strong>架构升级</strong>：从localStorage迁移到PostgreSQL云数据库（Neon），实现真正的多用户系统</li>
+                        <li><strong>后端API实现</strong>：使用Vercel Serverless Functions构建完整后端，5个核心API端点</li>
+                        <li><strong>认证系统</strong>：JWT token认证，bcryptjs密码加密，安全可靠</li>
+                        <li><strong>密码管理</strong>：支持用户修改密码，管理员可重置任何用户密码</li>
+                        <li><strong>数据导入工具</strong>：支持从本地版本迁移数据到云端，拖拽上传界面</li>
+                        <li><strong>真正的多用户</strong>：管理员可查看所有用户，切换查看不同用户数据</li>
+                    </ul>
+                </div>
+
+                <div class="changelog-item">
+                    <div class="changelog-version">
+                        <h4>v1.10</h4>
                     </div>
                     <div class="changelog-date">2026年1月30日</div>
                     <ul class="changelog-features">
@@ -1236,7 +1266,6 @@
                         <li><strong>用户列表</strong>：管理员可查看所有注册用户和统计信息</li>
                         <li><strong>切换查看</strong>：管理员可切换查看任意用户的完整日志和周报</li>
                         <li><strong>数据导出</strong>：支持导出单个用户或所有用户的数据</li>
-                        <li><strong>权限标识</strong>：管理员账号显示特殊标识，方便识别</li>
                     </ul>
                 </div>
 
@@ -1247,10 +1276,8 @@
                     <div class="changelog-date">2026年1月30日</div>
                     <ul class="changelog-features">
                         <li><strong>账号系统</strong>：新增用户注册和登录功能，支持多用户独立使用</li>
-                        <li><strong>数据隔离</strong>：每个用户的日志、图片、API密钥完全独立，互不干扰</li>
-                        <li><strong>安全认证</strong>：密码加密存储，登录状态保持，支持安全退出</li>
-                        <li><strong>用户信息</strong>：头部显示当前登录用户名和退出按钮</li>
-                        <li><strong>无缝切换</strong>：支持多用户登录切换，数据自动切换</li>
+                        <li><strong>数据隔离</strong>：每个用户的日志、图片、API密钥完全独立</li>
+                        <li><strong>安全认证</strong>：密码加密存储，登录状态保持</li>
                     </ul>
                 </div>
 
@@ -1260,115 +1287,9 @@
                     </div>
                     <div class="changelog-date">2026年1月30日</div>
                     <ul class="changelog-features">
-                        <li><strong>图片上传功能</strong>：新增图片附件上传，支持一次选择多张图片，记录任务更直观</li>
-                        <li><strong>图片预览</strong>：上传前实时预览图片，支持单独移除不需要的图片</li>
-                        <li><strong>大图查看</strong>：点击历史记录或周报中的图片可查看大图，支持点击背景关闭</li>
-                        <li><strong>智能存储</strong>：图片自动转换为base64存储在本地，单张限制5MB，保护隐私</li>
-                        <li><strong>完整集成</strong>：图片在历史记录和周报中完美展示，视觉呈现更丰富</li>
-                    </ul>
-                </div>
-
-                <div class="changelog-item">
-                    <div class="changelog-version">
-                        <h4>v1.7</h4>
-                    </div>
-                    <div class="changelog-date">2026年1月28日</div>
-                    <ul class="changelog-features">
-                        <li><strong>标题预览功能</strong>：新增独立的标题输入框和"生成标题"按钮，允许用户在保存前预览并手动编辑AI生成的标题</li>
-                        <li><strong>工作流优化</strong>：改变AI提取时机，从自动提取改为用户主动触发，增强控制感</li>
-                        <li><strong>提交简化</strong>：表单提交不再调用AI，直接使用预填充的标题值，提升保存速度</li>
-                        <li><strong>字段清理</strong>：提交后自动清空标题输入框，避免重复内容</li>
-                    </ul>
-                </div>
-
-                <div class="changelog-item">
-                    <div class="changelog-version">
-                        <h4>v1.6</h4>
-                    </div>
-                    <div class="changelog-date">2026年1月28日</div>
-                    <ul class="changelog-features">
-                        <li><strong>AI提取增强</strong>：大幅优化prompt策略，添加正反示例和提炼方法论，彻底解决简单复制问题</li>
-                        <li><strong>汉字计数</strong>：标题长度从字符改为汉字计数，限制50个汉字，更符合中文习惯</li>
-                        <li><strong>格式清理</strong>：自动移除引号、冒号和"标题："等前缀，输出更纯净</li>
-                        <li><strong>降级优化</strong>：无API时智能提取前50个汉字，保持体验一致性</li>
-                    </ul>
-                </div>
-
-                <div class="changelog-item">
-                    <div class="changelog-version">
-                        <h4>v1.5</h4>
-                    </div>
-                    <div class="changelog-date">2026年1月28日</div>
-                    <ul class="changelog-features">
-                        <li><strong>升级日志</strong>：新增页脚升级日志链接和弹窗，完整记录产品迭代历史</li>
-                        <li><strong>周报对齐修复</strong>：统一周报与日志的卡片样式，每日任务详情改用卡片布局，视觉更一致</li>
-                        <li><strong>交互优化</strong>：支持ESC键关闭弹窗，点击背景区域关闭，交互更便捷</li>
-                        <li><strong>版本管理</strong>：建立完善的版本号体系，方便追踪功能演进</li>
-                    </ul>
-                </div>
-
-                <div class="changelog-item">
-                    <div class="changelog-version">
-                        <h4>v1.4</h4>
-                    </div>
-                    <div class="changelog-date">2026年1月28日</div>
-                    <ul class="changelog-features">
-                        <li><strong>AI智能提取</strong>：集成Claude API，自动从详细内容中提取任务描述，无需手动输入标题</li>
-                        <li><strong>布局优化</strong>：将日期、任务类型、时长三个控件合并为一行，节省空间，提升录入效率</li>
-                        <li><strong>汽车主题背景</strong>：添加专业汽车摄影背景图，增强视觉表达力</li>
-                        <li><strong>智能降级</strong>：未配置API时自动截取前50字作为描述，确保功能可用</li>
-                    </ul>
-                </div>
-
-                <div class="changelog-item">
-                    <div class="changelog-version">
-                        <h4>v1.3</h4>
-                    </div>
-                    <div class="changelog-date">2026年1月28日</div>
-                    <ul class="changelog-features">
-                        <li><strong>简化界面</strong>：合并"记录"和"历史记录"为单一"日志"标签，记录即保存，连续添加更便捷</li>
-                        <li><strong>移除评星</strong>：取消效果评价功能，聚焦核心记录，减少操作步骤</li>
-                        <li><strong>视觉优化</strong>：删除按钮改为透明低调设计，减少干扰，提升专注度</li>
-                        <li><strong>保留历史</strong>：保留日期和任务类型选择，方便连续录入同类任务</li>
-                    </ul>
-                </div>
-
-                <div class="changelog-item">
-                    <div class="changelog-version">
-                        <h4>v1.2</h4>
-                    </div>
-                    <div class="changelog-date">2026年1月28日</div>
-                    <ul class="changelog-features">
-                        <li><strong>苹果风格设计</strong>：全新视觉系统，采用苹果系统字体、蓝色主题、毛玻璃效果和流畅动画</li>
-                        <li><strong>换行支持</strong>：历史记录和周报中的多行文本支持正常换行显示，阅读体验更佳</li>
-                        <li><strong>数据完整迁移</strong>：使用相同localStorage键名，所有历史数据自动保留</li>
-                        <li><strong>时长统计修复</strong>：修复每日时长统计bug，在周报中添加每日汇总，时长计算更准确</li>
-                    </ul>
-                </div>
-
-                <div class="changelog-item">
-                    <div class="changelog-version">
-                        <h4>v1.1</h4>
-                    </div>
-                    <div class="changelog-date">2026年1月27日</div>
-                    <ul class="changelog-features">
-                        <li><strong>智能周报</strong>：自动统计每周任务数、总时长、任务分类和每日详情</li>
-                        <li><strong>数据导出</strong>：支持导出JSON格式的完整数据和纯文本格式的周报</li>
-                        <li><strong>本地存储</strong>：使用localStorage持久化保存，数据永不丢失</li>
-                        <li><strong>响应式设计</strong>：完美适配桌面和移动端设备</li>
-                    </ul>
-                </div>
-
-                <div class="changelog-item">
-                    <div class="changelog-version">
-                        <h4>v1.0</h4>
-                    </div>
-                    <div class="changelog-date">2026年1月27日</div>
-                    <ul class="changelog-features">
-                        <li><strong>基础功能</strong>：日志记录、历史查看、任务分类</li>
-                        <li><strong>时长追踪</strong>：记录每个任务的使用时长</li>
-                        <li><strong>效果评价</strong>：5星评分系统评估AI工具效果</li>
-                        <li><strong>渐变设计</strong>：紫色渐变主题，卡片式布局</li>
+                        <li><strong>图片上传功能</strong>：支持一次选择多张图片，记录任务更直观</li>
+                        <li><strong>图片预览</strong>：上传前实时预览，支持单独移除</li>
+                        <li><strong>大图查看</strong>：点击图片查看大图</li>
                     </ul>
                 </div>
             </div>

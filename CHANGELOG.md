@@ -1,4 +1,4 @@
-# 📋 AI Agent Journal 更新日志
+# 📋 空间智能部-Agent实战之路 更新日志
 
 ## 🎨 Version 2.1.0 - AI多模型支持与UI优化 (2026-01-31)
 
