@@ -34,7 +34,7 @@ async function initAuth() {
     if (token) {
         try {
             // 验证token并获取用户信息
-            const response = await fetch(`${API_BASE_URL}/api/auth/verify?token=${token}`);
+            const response = await fetch(`${API_BASE_URL}/api/auth?action=verify&token=${token}`);
             const data = await response.json();
 
             if (!response.ok) {
@@ -143,12 +143,12 @@ async function handleRegister(event) {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        const response = await fetch(`${API_BASE_URL}/api/auth`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ action: 'register', username, password })
         });
 
         const data = await response.json();
@@ -159,12 +159,12 @@ async function handleRegister(event) {
         }
 
         // 注册成功，自动登录
-        const loginResponse = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        const loginResponse = await fetch(`${API_BASE_URL}/api/auth`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ action: 'login', username, password })
         });
 
         const loginData = await loginResponse.json();
@@ -195,12 +195,12 @@ async function handleLogin(event) {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        const response = await fetch(`${API_BASE_URL}/api/auth`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ action: 'login', username, password })
         });
 
         const data = await response.json();
@@ -999,12 +999,13 @@ async function handleChangePassword() {
 
     try {
         const token = getToken();
-        const response = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
+        const response = await fetch(`${API_BASE_URL}/api/auth`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
+                action: 'change-password',
                 token: token,
                 oldPassword: oldPassword,
                 newPassword: newPassword
