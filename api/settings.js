@@ -26,7 +26,8 @@ module.exports = async function handler(req, res) {
     // GET: 获取 API Key
     if (req.method === 'GET') {
       const token = req.query.token;
-      const provider = req.query.provider || 'anthropic';
+      const provider = req.query.provider;
+      const action = req.query.action;
 
       if (!token) {
         return res.status(401).json({ error: '未提供认证令牌' });
@@ -35,6 +36,27 @@ module.exports = async function handler(req, res) {
       const decoded = verifyToken(token);
       if (!decoded) {
         return res.status(401).json({ error: '无效的认证令牌' });
+      }
+
+      // 如果action=list，返回所有已配置的provider
+      if (action === 'list') {
+        const result = await query(
+          'SELECT provider, created_at FROM user_api_keys WHERE user_id = $1 ORDER BY created_at DESC',
+          [decoded.userId]
+        );
+
+        return res.status(200).json({
+          success: true,
+          providers: result.rows.map(row => ({
+            provider: row.provider,
+            createdAt: row.created_at
+          }))
+        });
+      }
+
+      // 否则查询特定provider的API Key
+      if (!provider) {
+        return res.status(400).json({ error: '请指定provider' });
       }
 
       // 查询 API Key
@@ -56,7 +78,9 @@ module.exports = async function handler(req, res) {
       const apiKey = decrypt(encryptedKey);
 
       // 返回部分隐藏的 API Key
-      const maskedKey = apiKey.substring(0, 10) + '...' + apiKey.substring(apiKey.length - 4);
+      const maskedKey = apiKey.length > 14
+        ? apiKey.substring(0, 10) + '...' + apiKey.substring(apiKey.length - 4)
+        : '***' + apiKey.substring(apiKey.length - 4);
 
       return res.status(200).json({
         success: true,
@@ -85,10 +109,21 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: 'API Key 不能为空' });
       }
 
-      // Anthropic API Key 格式验证
+      // 验证不同provider的API Key格式
       if (provider === 'anthropic' && !apiKey.startsWith('sk-ant-')) {
         return res.status(400).json({ error: 'Claude API Key 格式错误（应以 sk-ant- 开头）' });
       }
+
+      if (provider === 'openai' && !apiKey.startsWith('sk-')) {
+        return res.status(400).json({ error: 'OpenAI API Key 格式错误（应以 sk- 开头）' });
+      }
+
+      if (provider === 'deepseek' && !apiKey.startsWith('sk-')) {
+        return res.status(400).json({ error: 'DeepSeek API Key 格式错误（应以 sk- 开头）' });
+      }
+
+      // google 和 ollama 不需要特殊格式验证
+      // ollama 的 apiKey 存储的是 base URL (如 http://localhost:11434)
 
       // 加密 API Key
       const encryptedKey = encrypt(apiKey);

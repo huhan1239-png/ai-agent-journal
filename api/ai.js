@@ -12,19 +12,39 @@ function verifyToken(token) {
   }
 }
 
-async function getUserApiKey(userId) {
+// 获取用户的API Key和默认provider
+async function getUserApiKey(userId, preferredProvider = null) {
+  // 如果指定了provider，尝试获取该provider的key
+  if (preferredProvider) {
+    const result = await query(
+      'SELECT api_key_encrypted, provider FROM user_api_keys WHERE user_id = $1 AND provider = $2',
+      [userId, preferredProvider]
+    );
+    if (result.rows.length > 0) {
+      return {
+        apiKey: decrypt(result.rows[0].api_key_encrypted),
+        provider: result.rows[0].provider
+      };
+    }
+  }
+
+  // 否则，按优先级获取第一个可用的key
   const result = await query(
-    'SELECT api_key_encrypted FROM user_api_keys WHERE user_id = $1 AND provider = $2',
-    [userId, 'anthropic']
+    'SELECT api_key_encrypted, provider FROM user_api_keys WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
+    [userId]
   );
 
   if (result.rows.length === 0) {
     return null;
   }
 
-  return decrypt(result.rows[0].api_key_encrypted);
+  return {
+    apiKey: decrypt(result.rows[0].api_key_encrypted),
+    provider: result.rows[0].provider
+  };
 }
 
+// 调用 Claude API
 async function callClaudeAPI(apiKey, prompt, maxTokens = 1024) {
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -36,35 +56,150 @@ async function callClaudeAPI(apiKey, prompt, maxTokens = 1024) {
     body: JSON.stringify({
       model: 'claude-3-5-sonnet-20241022',
       max_tokens: maxTokens,
-      messages: [
-        {
-          role: 'user',
-          content: prompt
-        }
-      ]
+      messages: [{ role: 'user', content: prompt }]
     })
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error('AI 服务调用失败：' + (errorData.error?.message || '未知错误'));
+    throw new Error('Claude API 调用失败：' + (errorData.error?.message || '未知错误'));
   }
 
   const data = await response.json();
   return data.content[0].text;
 }
 
+// 调用 OpenAI API
+async function callOpenAIAPI(apiKey, prompt, maxTokens = 1024) {
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: 'gpt-4-turbo-preview',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: maxTokens
+    })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error('OpenAI API 调用失败：' + (errorData.error?.message || '未知错误'));
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+// 调用 Google Gemini API
+async function callGeminiAPI(apiKey, prompt, maxTokens = 1024) {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      contents: [{
+        parts: [{ text: prompt }]
+      }],
+      generationConfig: {
+        maxOutputTokens: maxTokens
+      }
+    })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error('Gemini API 调用失败：' + (errorData.error?.message || '未知错误'));
+  }
+
+  const data = await response.json();
+  return data.candidates[0].content.parts[0].text;
+}
+
+// 调用 Ollama 本地模型
+async function callOllamaAPI(baseUrl, prompt, maxTokens = 1024) {
+  // Ollama默认运行在 http://localhost:11434
+  const url = baseUrl || 'http://localhost:11434';
+
+  const response = await fetch(`${url}/api/generate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'llama2',  // 默认使用 llama2，用户可以改成其他模型
+      prompt: prompt,
+      stream: false,
+      options: {
+        num_predict: maxTokens
+      }
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error('Ollama API 调用失败：请确保 Ollama 正在运行');
+  }
+
+  const data = await response.json();
+  return data.response;
+}
+
+// 调用 DeepSeek API
+async function callDeepSeekAPI(apiKey, prompt, maxTokens = 1024) {
+  const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: 'deepseek-chat',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: maxTokens
+    })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error('DeepSeek API 调用失败：' + (errorData.error?.message || '未知错误'));
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+// 统一的AI调用接口
+async function callAI(provider, apiKey, prompt, maxTokens = 1024) {
+  switch (provider) {
+    case 'anthropic':
+      return await callClaudeAPI(apiKey, prompt, maxTokens);
+    case 'openai':
+      return await callOpenAIAPI(apiKey, prompt, maxTokens);
+    case 'google':
+      return await callGeminiAPI(apiKey, prompt, maxTokens);
+    case 'ollama':
+      return await callOllamaAPI(apiKey, prompt, maxTokens);
+    case 'deepseek':
+      return await callDeepSeekAPI(apiKey, prompt, maxTokens);
+    default:
+      throw new Error(`不支持的AI提供商: ${provider}`);
+  }
+}
+
 // 功能1：增强日志描述
 async function enhanceEntry(req, res, decoded) {
-  const { briefDescription, task, category } = req.body;
+  const { briefDescription, task, category, provider } = req.body;
 
   if (!briefDescription) {
     return res.status(400).json({ error: '请提供简要描述' });
   }
 
-  const apiKey = await getUserApiKey(decoded.userId);
-  if (!apiKey) {
-    return res.status(400).json({ error: '请先在设置中配置 Claude API Key' });
+  const keyInfo = await getUserApiKey(decoded.userId, provider);
+  if (!keyInfo) {
+    return res.status(400).json({ error: '请先在设置中配置 API Key' });
   }
 
   const prompt = `你是一个专业的工作日志助手。用户正在记录他们的工作日志。
@@ -84,25 +219,26 @@ async function enhanceEntry(req, res, decoded) {
 
 直接输出优化后的描述内容即可。`;
 
-  const enhancedDescription = await callClaudeAPI(apiKey, prompt, 1024);
+  const enhancedDescription = await callAI(keyInfo.provider, keyInfo.apiKey, prompt, 1024);
 
   return res.status(200).json({
     success: true,
-    enhancedDescription: enhancedDescription
+    enhancedDescription: enhancedDescription,
+    usedProvider: keyInfo.provider
   });
 }
 
 // 功能2：生成周报
 async function generateReport(req, res, decoded) {
-  const { startDate, endDate } = req.body;
+  const { startDate, endDate, provider } = req.body;
 
   if (!startDate || !endDate) {
     return res.status(400).json({ error: '请提供日期范围' });
   }
 
-  const apiKey = await getUserApiKey(decoded.userId);
-  if (!apiKey) {
-    return res.status(400).json({ error: '请先在设置中配置 Claude API Key' });
+  const keyInfo = await getUserApiKey(decoded.userId, provider);
+  if (!keyInfo) {
+    return res.status(400).json({ error: '请先在设置中配置 API Key' });
   }
 
   // 获取指定日期范围的日志
@@ -162,11 +298,12 @@ ${entriesText}
 
 使用专业、简洁的语言，保持客观。使用markdown格式输出。`;
 
-  const weeklyReport = await callClaudeAPI(apiKey, prompt, 4096);
+  const weeklyReport = await callAI(keyInfo.provider, keyInfo.apiKey, prompt, 4096);
 
   return res.status(200).json({
     success: true,
     report: weeklyReport,
+    usedProvider: keyInfo.provider,
     stats: {
       totalHours,
       totalEntries: entries.length,
@@ -177,11 +314,11 @@ ${entriesText}
 
 // 功能3：工作分析
 async function analyzeWork(req, res, decoded) {
-  const { days = 30 } = req.body;
+  const { days = 30, provider } = req.body;
 
-  const apiKey = await getUserApiKey(decoded.userId);
-  if (!apiKey) {
-    return res.status(400).json({ error: '请先在设置中配置 Claude API Key' });
+  const keyInfo = await getUserApiKey(decoded.userId, provider);
+  if (!keyInfo) {
+    return res.status(400).json({ error: '请先在设置中配置 API Key' });
   }
 
   // 获取最近N天的日志
@@ -274,11 +411,12 @@ ${entries.slice(0, 10).map((entry, index) =>
 
 使用专业但友好的语气，提供有价值的洞察。使用markdown格式，包含适当的强调和列表。`;
 
-  const analysis = await callClaudeAPI(apiKey, prompt, 4096);
+  const analysis = await callAI(keyInfo.provider, keyInfo.apiKey, prompt, 4096);
 
   return res.status(200).json({
     success: true,
     analysis: analysis,
+    usedProvider: keyInfo.provider,
     stats: analysisData
   });
 }

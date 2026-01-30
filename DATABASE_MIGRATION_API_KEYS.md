@@ -35,6 +35,14 @@ CREATE TRIGGER update_user_api_keys_updated_at
 ## 说明
 
 - `api_key_encrypted`: 加密后的 API Key（使用 AES 加密）
-- `provider`: API 提供商（anthropic, openai 等）
+- `provider`: API 提供商（支持: anthropic, openai, google, ollama, deepseek）
 - `user_id`: 关联用户 ID
 - 每个用户每个提供商只能有一个 API Key（UNIQUE 约束）
+
+## 支持的 AI 提供商
+
+1. **anthropic** - Claude (claude-3-5-sonnet, claude-3-opus 等)
+2. **openai** - ChatGPT (gpt-4, gpt-3.5-turbo 等)
+3. **google** - Gemini (gemini-pro, gemini-ultra 等)
+4. **ollama** - 本地模型 (llama2, mistral 等)
+5. **deepseek** - DeepSeek (deepseek-chat, deepseek-coder 等)
