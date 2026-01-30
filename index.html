@@ -1165,6 +1165,7 @@
             <div class="user-info">
                 <span class="username-badge" id="usernameBadge"></span>
                 <span class="admin-badge" id="adminBadge" style="display: none;">管理员</span>
+                <button class="logout-btn" onclick="window.location.href='ai-settings.html'" style="background: #ff9500; margin-right: 10px;">🤖 AI设置</button>
                 <button class="logout-btn" onclick="showChangePasswordDialog()" style="background: #0071e3; margin-right: 10px;">修改密码</button>
                 <button class="logout-btn" onclick="handleLogout()">退出登录</button>
             </div>
@@ -1244,6 +1245,10 @@
                 <div class="form-group">
                     <label>详细内容</label>
                     <textarea id="entryDescription" placeholder="记录具体使用了哪些AI功能，解决了什么问题，有什么收获..." required></textarea>
+                    <button type="button" class="btn" onclick="enhanceWithAI()" style="margin-top: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        ✨ AI 辅助写日志
+                    </button>
+                    <p style="color: #6e6e73; font-size: 12px; margin-top: 5px;">💡 提示：输入简要描述，点击按钮让 AI 扩展为完整详细的日志</p>
                 </div>
 
                 <div class="form-group">
@@ -1279,6 +1284,8 @@
                 <label>选择周：</label>
                 <select id="weekSelector" onchange="generateWeeklyReport()">
                 </select>
+                <button class="btn" onclick="generateAIReport()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">🤖 AI 生成周报</button>
+                <button class="btn" onclick="showAIAnalysis()" style="background: #ff9500;">📊 AI 智能分析</button>
                 <button class="btn" onclick="exportWeeklyReport()">导出周报</button>
             </div>
             <div id="weeklyReport"></div>

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 设置 - AI Agent Journal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #1d1d1f;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #6e6e73;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box p {
+            color: #1565c0;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .info-box a {
+            color: #0071e3;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .info-box a:hover {
+            text-decoration: underline;
+        }
+
+        .status-box {
+            background: #f5f5f7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .status-box.has-key {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        .status-box.no-key {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1d1d1f;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: 'Monaco', 'Courier New', monospace;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #0071e3;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            background: #0077ed;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+        }
+
+        .btn:disabled {
+            background: #86868b;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-danger {
+            background: #ff3b30;
+        }
+
+        .btn-danger:hover {
+            background: #ff4940;
+        }
+
+        .btn-secondary {
+            background: #6e6e73;
+        }
+
+        .btn-secondary:hover {
+            background: #86868b;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 4px solid #28a745;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .hint {
+            color: #6e6e73;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .feature-list {
+            background: #f5f5f7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+
+        .feature-list h3 {
+            color: #1d1d1f;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .feature-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            color: #6e6e73;
+            font-size: 14px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list li::before {
+            content: "✨ ";
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI 功能设置</h1>
+        <p class="subtitle">配置 Claude API Key 以启用 AI 智能功能</p>
+
+        <div class="info-box">
+            <p><strong>获取 API Key：</strong></p>
+            <p>1. 访问 <a href="https://console.anthropic.com/" target="_blank">Anthropic Console</a></p>
+            <p>2. 注册/登录账号</p>
+            <p>3. 点击 "API Keys" → "Create Key"</p>
+            <p>4. 复制生成的 API Key（格式：sk-ant-api03-...）</p>
+        </div>
+
+        <div class="status-box" id="statusBox">
+            <p id="statusText">正在检查 API Key 状态...</p>
+        </div>
+
+        <div class="message" id="message"></div>
+
+        <div class="form-group">
+            <label>Claude API Key:</label>
+            <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-...">
+            <p class="hint">API Key 将加密存储在云端，仅用于调用 AI 功能</p>
+        </div>
+
+        <button class="btn" id="saveBtn" onclick="saveApiKey()">保存 API Key</button>
+        <button class="btn btn-danger" id="deleteBtn" onclick="deleteApiKey()" style="display: none;">删除 API Key</button>
+        <button class="btn btn-secondary" onclick="window.location.href='index.html'">返回主页</button>
+
+        <div class="feature-list">
+            <h3>启用 AI 功能后，你可以：</h3>
+            <ul>
+                <li>AI 辅助写日志 - 输入简要描述，AI 扩展为完整专业的日志</li>
+                <li>AI 生成周报 - 基于本周所有日志，自动生成专业周报</li>
+                <li>AI 智能分析 - 分析工作时间分配、效率趋势，提供改进建议</li>
+                <li>AI 分类建议 - 输入任务后，AI 建议最合适的分类</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.location.origin;
+
+        // 页面加载时检查 API Key 状态
+        window.onload = async function() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('请先登录');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            await checkApiKeyStatus();
+        };
+
+        // 检查 API Key 状态
+        async function checkApiKeyStatus() {
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE_URL}/api/settings/get-api-key?token=${token}&provider=anthropic`);
+                const data = await response.json();
+
+                const statusBox = document.getElementById('statusBox');
+                const statusText = document.getElementById('statusText');
+                const deleteBtn = document.getElementById('deleteBtn');
+
+                if (data.hasApiKey) {
+                    statusBox.className = 'status-box has-key';
+                    statusText.innerHTML = `✅ 已配置 API Key<br><small style="color: #6e6e73;">掩码：${data.apiKey}</small>`;
+                    deleteBtn.style.display = 'block';
+                } else {
+                    statusBox.className = 'status-box no-key';
+                    statusText.textContent = '⚠️ 尚未配置 API Key，请在下方输入并保存';
+                    deleteBtn.style.display = 'none';
+                }
+
+            } catch (error) {
+                console.error('Check API key error:', error);
+                showMessage('检查状态失败', 'error');
+            }
+        }
+
+        // 保存 API Key
+        async function saveApiKey() {
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+
+            if (!apiKey) {
+                showMessage('请输入 API Key', 'error');
+                return;
+            }
+
+            if (!apiKey.startsWith('sk-ant-')) {
+                showMessage('API Key 格式错误（应以 sk-ant- 开头）', 'error');
+                return;
+            }
+
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = '保存中...';
+
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE_URL}/api/settings/save-api-key`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        token: token,
+                        apiKey: apiKey,
+                        provider: 'anthropic'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showMessage(data.error || '保存失败', 'error');
+                    return;
+                }
+
+                showMessage('✅ API Key 保存成功！现在可以使用 AI 功能了', 'success');
+                document.getElementById('apiKeyInput').value = '';
+                await checkApiKeyStatus();
+
+            } catch (error) {
+                console.error('Save API key error:', error);
+                showMessage('保存失败，请检查网络连接', 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = '保存 API Key';
+            }
+        }
+
+        // 删除 API Key
+        async function deleteApiKey() {
+            if (!confirm('确定要删除 API Key 吗？删除后将无法使用 AI 功能。')) {
+                return;
+            }
+
+            const deleteBtn = document.getElementById('deleteBtn');
+            deleteBtn.disabled = true;
+            deleteBtn.textContent = '删除中...';
+
+            try {
+                const token = localStorage.getItem('authToken');
+                const response = await fetch(`${API_BASE_URL}/api/settings/delete-api-key?token=${token}&provider=anthropic`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showMessage(data.error || '删除失败', 'error');
+                    return;
+                }
+
+                showMessage('✅ API Key 已删除', 'success');
+                await checkApiKeyStatus();
+
+            } catch (error) {
+                console.error('Delete API key error:', error);
+                showMessage('删除失败，请检查网络连接', 'error');
+            } finally {
+                deleteBtn.disabled = false;
+                deleteBtn.textContent = '删除 API Key';
+            }
+        }
+
+        // 显示消息
+        function showMessage(text, type) {
+            const message = document.getElementById('message');
+            message.textContent = text;
+            message.className = `message ${type} show`;
+
+            setTimeout(() => {
+                message.classList.remove('show');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

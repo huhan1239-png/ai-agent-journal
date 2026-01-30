@@ -1140,3 +1140,176 @@ async function handleResetPassword(userId, username) {
         errorDiv.style.display = 'block';
     }
 }
+
+// ==================== AI 功能 ====================
+
+// AI 辅助写日志
+async function enhanceWithAI() {
+    const briefDescription = document.getElementById('entryDescription').value.trim();
+    const task = document.getElementById('entryTask').value.trim();
+    const category = document.getElementById('entryCategory').value;
+
+    if (!briefDescription) {
+        alert('请先输入简要描述');
+        return;
+    }
+
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = '🤖 AI 思考中...';
+
+    try {
+        const token = getToken();
+        const response = await fetch(`${API_BASE_URL}/api/ai/enhance-entry`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                token: token,
+                briefDescription: briefDescription,
+                task: task,
+                category: category
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(data.error || 'AI 辅助失败');
+            return;
+        }
+
+        // 将 AI 生成的内容填入描述框
+        document.getElementById('entryDescription').value = data.enhancedDescription;
+        alert('✅ AI 已优化你的描述！');
+
+    } catch (error) {
+        console.error('AI enhance error:', error);
+        alert('AI 辅助失败，请检查网络连接');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '✨ AI 辅助';
+    }
+}
+
+// AI 生成周报
+async function generateAIReport() {
+    const weekSelector = document.getElementById('weekSelector');
+    const selectedWeek = weekSelector.value;
+
+    if (!selectedWeek) {
+        alert('请先选择周次');
+        return;
+    }
+
+    const [startDate, endDate] = selectedWeek.split('|');
+
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = '🤖 AI 生成中...';
+
+    try {
+        const token = getToken();
+        const response = await fetch(`${API_BASE_URL}/api/ai/generate-report`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                token: token,
+                startDate: startDate,
+                endDate: endDate
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(data.error || 'AI 生成失败');
+            return;
+        }
+
+        // 显示 AI 生成的周报
+        const reportDiv = document.getElementById('weeklyReport');
+        reportDiv.innerHTML = `
+            <div style="background: #f5f5f7; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                <h3 style="color: #0071e3; margin-bottom: 10px;">🤖 AI 生成的周报</h3>
+                <div style="white-space: pre-wrap; line-height: 1.8;">${data.report}</div>
+            </div>
+        `;
+
+        alert('✅ AI 周报生成成功！');
+
+    } catch (error) {
+        console.error('AI generate report error:', error);
+        alert('AI 生成失败，请检查网络连接');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '🤖 AI 生成周报';
+    }
+}
+
+// AI 智能分析
+async function showAIAnalysis() {
+    const modal = document.createElement('div');
+    modal.id = 'aiAnalysisModal';
+    modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
+
+    modal.innerHTML = `
+        <div style="background: white; padding: 40px; border-radius: 15px; max-width: 800px; width: 90%; max-height: 80vh; overflow-y: auto;">
+            <h3 style="margin: 0 0 20px 0; color: #1d1d1f;">🤖 AI 智能分析</h3>
+            <div id="analysisContent">
+                <p style="text-align: center; color: #6e6e73;">正在分析你的工作数据...</p>
+            </div>
+            <button onclick="closeAIAnalysis()" style="width: 100%; padding: 12px; background: #6e6e73; color: white; border: none; border-radius: 8px; font-size: 14px; margin-top: 20px; cursor: pointer;">
+                关闭
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    try {
+        const token = getToken();
+        const response = await fetch(`${API_BASE_URL}/api/ai/analyze-work`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                token: token,
+                days: 30
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            document.getElementById('analysisContent').innerHTML = `
+                <p style="color: #ff3b30;">${data.error || 'AI 分析失败'}</p>
+            `;
+            return;
+        }
+
+        document.getElementById('analysisContent').innerHTML = `
+            <div style="background: #f5f5f7; padding: 20px; border-radius: 10px;">
+                <div style="white-space: pre-wrap; line-height: 1.8;">${data.analysis}</div>
+            </div>
+        `;
+
+    } catch (error) {
+        console.error('AI analysis error:', error);
+        document.getElementById('analysisContent').innerHTML = `
+            <p style="color: #ff3b30;">AI 分析失败，请检查网络连接</p>
+        `;
+    }
+}
+
+// 关闭 AI 分析弹窗
+function closeAIAnalysis() {
+    const modal = document.getElementById('aiAnalysisModal');
+    if (modal) {
+        modal.remove();
+    }
+}
