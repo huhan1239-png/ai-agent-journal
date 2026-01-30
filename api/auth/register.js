@@ -1,5 +1,5 @@
 const { query } = require('../db.js');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 
 module.exports = async function handler(req, res) {
   // 设置 CORS

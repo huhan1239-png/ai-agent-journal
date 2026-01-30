@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "pg": "^8.11.3",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.2"
   },
   "keywords": ["ai", "journal", "vercel"],

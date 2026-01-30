@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 3px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .error {
+            background: #fee;
+            color: #c00;
+        }
+        .success {
+            background: #efe;
+            color: #060;
+        }
+    </style>
+</head>
+<body>
+    <h1>API 端点测试</h1>
+
+    <div class="test-section">
+        <h3>测试 1: 直接访问 register API</h3>
+        <button onclick="testRegisterAPI()">测试注册 API</button>
+        <div id="register-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>测试 2: 直接访问 login API</h3>
+        <button onclick="testLoginAPI()">测试登录 API</button>
+        <div id="login-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>测试 3: 检查 API 路径</h3>
+        <button onclick="checkAPIPath()">检查路径</button>
+        <div id="path-result" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = window.location.origin;
+
+        async function testRegisterAPI() {
+            const resultDiv = document.getElementById('register-result');
+            resultDiv.textContent = '正在测试...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'test_' + Date.now(),
+                        password: 'test123456'
+                    })
+                });
+
+                const contentType = response.headers.get('content-type');
+                console.log('Response Content-Type:', contentType);
+                console.log('Response Status:', response.status);
+
+                let data;
+                const text = await response.text();
+                console.log('Response Text:', text);
+
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `错误: API 返回了非 JSON 数据\n\nStatus: ${response.status}\nContent-Type: ${contentType}\n\n返回内容:\n${text}`;
+                    return;
+                }
+
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `成功!\n\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `失败 (${response.status}):\n\n${JSON.stringify(data, null, 2)}`;
+                }
+
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `网络错误:\n${error.message}\n\nAPI URL: ${API_BASE_URL}/api/auth/register`;
+                console.error('Test error:', error);
+            }
+        }
+
+        async function testLoginAPI() {
+            const resultDiv = document.getElementById('login-result');
+            resultDiv.textContent = '正在测试...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: 'admin123'
+                    })
+                });
+
+                const contentType = response.headers.get('content-type');
+                const text = await response.text();
+
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `错误: API 返回了非 JSON 数据\n\nStatus: ${response.status}\nContent-Type: ${contentType}\n\n返回内容:\n${text}`;
+                    return;
+                }
+
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `成功!\n\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `失败 (${response.status}):\n\n${JSON.stringify(data, null, 2)}`;
+                }
+
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `网络错误:\n${error.message}\n\nAPI URL: ${API_BASE_URL}/api/auth/login`;
+                console.error('Test error:', error);
+            }
+        }
+
+        function checkAPIPath() {
+            const resultDiv = document.getElementById('path-result');
+            resultDiv.className = 'result';
+            resultDiv.textContent = `当前域名: ${window.location.origin}\n注册 API: ${API_BASE_URL}/api/auth/register\n登录 API: ${API_BASE_URL}/api/auth/login`;
+        }
+
+        // 自动运行路径检查
+        window.onload = function() {
+            checkAPIPath();
+        };
+    </script>
+</body>
+</html>
