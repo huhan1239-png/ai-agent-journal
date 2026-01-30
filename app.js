@@ -33,8 +33,19 @@ async function initAuth() {
     const token = getToken();
     if (token) {
         try {
-            // 尝试加载用户数据验证token
-            await loadEntries();
+            // 验证token并获取用户信息
+            const response = await fetch(`${API_BASE_URL}/api/auth/verify?token=${token}`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error('Token无效');
+            }
+
+            // 设置用户信息
+            currentUser = data.user;
+            isAdmin = data.user.isAdmin;
+
+            // 显示应用界面
             showApp();
         } catch (error) {
             console.error('Token validation failed:', error);
