@@ -279,11 +279,15 @@ function updateAdminInfo(stats) {
 // 切换查看用户
 async function switchViewUser() {
     const selectedUserId = document.getElementById('userSelect').value;
+    const resetPasswordBtn = document.getElementById('resetPasswordBtn');
 
     if (!selectedUserId) {
         // 返回管理员自己的视图
         viewingUser = null;
         document.getElementById('viewingAsBanner').style.display = 'none';
+        if (resetPasswordBtn) {
+            resetPasswordBtn.disabled = true;
+        }
     } else {
         try {
             const token = getToken();
@@ -294,6 +298,9 @@ async function switchViewUser() {
                 viewingUser = data.user;
                 document.getElementById('viewingUsername').textContent = data.user.username;
                 document.getElementById('viewingAsBanner').style.display = 'block';
+                if (resetPasswordBtn) {
+                    resetPasswordBtn.disabled = false;
+                }
             }
         } catch (error) {
             console.error('Switch view user error:', error);
@@ -303,6 +310,22 @@ async function switchViewUser() {
 
     // 重新加载数据
     await initApp();
+}
+
+// 管理员：重置选中用户的密码（快捷函数）
+function resetSelectedUserPassword() {
+    const selectedUserId = document.getElementById('userSelect').value;
+    const selectedOption = document.getElementById('userSelect').selectedOptions[0];
+
+    if (!selectedUserId) {
+        alert('请先选择要重置密码的用户');
+        return;
+    }
+
+    // 从option文本中提取用户名（格式：username (X条日志)）
+    const username = selectedOption.textContent.split(' (')[0];
+
+    showResetPasswordDialog(selectedUserId, username);
 }
 
 // 导出当前查看用户的数据
@@ -873,4 +896,236 @@ function exportWeeklyReport() {
     link.href = url;
     link.download = `周报_${selectedWeek}.txt`;
     link.click();
+}
+
+// ==================== 密码管理功能 ====================
+
+// 显示修改密码对话框
+function showChangePasswordDialog() {
+    const html = `
+        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;" id="changePasswordModal">
+            <div style="background: white; padding: 30px; border-radius: 15px; max-width: 400px; width: 90%;">
+                <h3 style="margin: 0 0 20px 0; color: #1d1d1f;">修改密码</h3>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #1d1d1f;">旧密码：</label>
+                    <input type="password" id="oldPassword" style="width: 100%; padding: 10px; border: 1px solid #d2d2d7; border-radius: 8px; font-size: 14px;">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #1d1d1f;">新密码：</label>
+                    <input type="password" id="newPassword" style="width: 100%; padding: 10px; border: 1px solid #d2d2d7; border-radius: 8px; font-size: 14px;">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #1d1d1f;">确认新密码：</label>
+                    <input type="password" id="confirmNewPassword" style="width: 100%; padding: 10px; border: 1px solid #d2d2d7; border-radius: 8px; font-size: 14px;">
+                </div>
+
+                <div id="changePasswordError" style="display: none; color: #ff3b30; font-size: 13px; margin-bottom: 15px;"></div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="handleChangePassword()" style="flex: 1; padding: 12px; background: #0071e3; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                        确认修改
+                    </button>
+                    <button onclick="closeChangePasswordDialog()" style="flex: 1; padding: 12px; background: #f5f5f7; color: #1d1d1f; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                        取消
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', html);
+
+    // 回车键提交
+    document.getElementById('confirmNewPassword').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleChangePassword();
+        }
+    });
+}
+
+// 关闭修改密码对话框
+function closeChangePasswordDialog() {
+    const modal = document.getElementById('changePasswordModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// 处理修改密码
+async function handleChangePassword() {
+    const oldPassword = document.getElementById('oldPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+    const errorDiv = document.getElementById('changePasswordError');
+
+    // 验证
+    if (!oldPassword || !newPassword || !confirmNewPassword) {
+        errorDiv.textContent = '请填写所有字段';
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        errorDiv.textContent = '新密码长度至少为6个字符';
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+        errorDiv.textContent = '两次输入的新密码不一致';
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    if (oldPassword === newPassword) {
+        errorDiv.textContent = '新密码不能与旧密码相同';
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    try {
+        const token = getToken();
+        const response = await fetch(`${API_BASE_URL}/api/auth/change-password`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                token: token,
+                oldPassword: oldPassword,
+                newPassword: newPassword
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            errorDiv.textContent = data.error || '修改密码失败';
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        // 成功
+        alert('密码修改成功！');
+        closeChangePasswordDialog();
+
+    } catch (error) {
+        console.error('Change password error:', error);
+        errorDiv.textContent = '修改密码失败，请检查网络连接';
+        errorDiv.style.display = 'block';
+    }
+}
+
+// 管理员：显示重置密码对话框
+function showResetPasswordDialog(userId, username) {
+    const html = `
+        <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;" id="resetPasswordModal">
+            <div style="background: white; padding: 30px; border-radius: 15px; max-width: 400px; width: 90%;">
+                <h3 style="margin: 0 0 20px 0; color: #1d1d1f;">重置用户密码</h3>
+
+                <div style="background: #f5f5f7; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #6e6e73; font-size: 14px;">目标用户：<strong style="color: #1d1d1f;">${username}</strong></p>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #1d1d1f;">新密码：</label>
+                    <input type="password" id="adminNewPassword" style="width: 100%; padding: 10px; border: 1px solid #d2d2d7; border-radius: 8px; font-size: 14px;">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #1d1d1f;">确认新密码：</label>
+                    <input type="password" id="adminConfirmPassword" style="width: 100%; padding: 10px; border: 1px solid #d2d2d7; border-radius: 8px; font-size: 14px;">
+                </div>
+
+                <div id="resetPasswordError" style="display: none; color: #ff3b30; font-size: 13px; margin-bottom: 15px;"></div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="handleResetPassword(${userId}, '${username}')" style="flex: 1; padding: 12px; background: #ff3b30; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                        确认重置
+                    </button>
+                    <button onclick="closeResetPasswordDialog()" style="flex: 1; padding: 12px; background: #f5f5f7; color: #1d1d1f; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">
+                        取消
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', html);
+
+    // 回车键提交
+    document.getElementById('adminConfirmPassword').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleResetPassword(userId, username);
+        }
+    });
+}
+
+// 关闭重置密码对话框
+function closeResetPasswordDialog() {
+    const modal = document.getElementById('resetPasswordModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// 管理员：处理重置密码
+async function handleResetPassword(userId, username) {
+    const newPassword = document.getElementById('adminNewPassword').value;
+    const confirmPassword = document.getElementById('adminConfirmPassword').value;
+    const errorDiv = document.getElementById('resetPasswordError');
+
+    // 验证
+    if (!newPassword || !confirmPassword) {
+        errorDiv.textContent = '请填写所有字段';
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    if (newPassword.length < 6) {
+        errorDiv.textContent = '新密码长度至少为6个字符';
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        errorDiv.textContent = '两次输入的新密码不一致';
+        errorDiv.style.display = 'block';
+        return;
+    }
+
+    try {
+        const token = getToken();
+        const response = await fetch(`${API_BASE_URL}/api/admin/reset-password`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                token: token,
+                userId: userId,
+                newPassword: newPassword
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            errorDiv.textContent = data.error || '重置密码失败';
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        // 成功
+        alert(`已成功为用户 "${username}" 重置密码！`);
+        closeResetPasswordDialog();
+
+    } catch (error) {
+        console.error('Reset password error:', error);
+        errorDiv.textContent = '重置密码失败，请检查网络连接';
+        errorDiv.style.display = 'block';
+    }
 }

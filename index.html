@@ -1165,6 +1165,7 @@
             <div class="user-info">
                 <span class="username-badge" id="usernameBadge"></span>
                 <span class="admin-badge" id="adminBadge" style="display: none;">管理员</span>
+                <button class="logout-btn" onclick="showChangePasswordDialog()" style="background: #0071e3; margin-right: 10px;">修改密码</button>
                 <button class="logout-btn" onclick="handleLogout()">退出登录</button>
             </div>
         </header>
@@ -1176,6 +1177,7 @@
                 <select class="admin-select" id="userSelect" onchange="switchViewUser()">
                     <option value="">选择要查看的用户...</option>
                 </select>
+                <button class="btn" onclick="resetSelectedUserPassword()" style="width: auto; margin: 0; background: #ff3b30;" id="resetPasswordBtn" disabled>重置密码</button>
                 <button class="btn" onclick="exportUserData()" style="width: auto; margin: 0;">导出当前用户数据</button>
                 <button class="btn btn-secondary" onclick="exportAllUsersData()" style="width: auto; margin: 0;">导出所有用户数据</button>
             </div>
