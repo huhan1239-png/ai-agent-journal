@@ -1315,9 +1315,16 @@
     </div>
     <!-- End of app-container -->
 
-  <script src="app.js"></script>
+    <script>
+        function showChangelog() {
+            document.getElementById('changelogModal').classList.add('show');
+        }
+
+        function hideChangelog(event) {
+            document.getElementById('changelogModal').classList.remove('show');
+        }
+    </script>
+
+    <script src="app.js"></script>
   </body>
-  </html>
-  
-</body>
 </html>
