@@ -269,7 +269,7 @@
         async function checkApiKeyStatus() {
             try {
                 const token = localStorage.getItem('authToken');
-                const response = await fetch(`${API_BASE_URL}/api/settings/get-api-key?token=${token}&provider=anthropic`);
+                const response = await fetch(`${API_BASE_URL}/api/settings?token=${token}&provider=anthropic`);
                 const data = await response.json();
 
                 const statusBox = document.getElementById('statusBox');
@@ -312,7 +312,7 @@
 
             try {
                 const token = localStorage.getItem('authToken');
-                const response = await fetch(`${API_BASE_URL}/api/settings/save-api-key`, {
+                const response = await fetch(`${API_BASE_URL}/api/settings`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -356,7 +356,7 @@
 
             try {
                 const token = localStorage.getItem('authToken');
-                const response = await fetch(`${API_BASE_URL}/api/settings/delete-api-key?token=${token}&provider=anthropic`, {
+                const response = await fetch(`${API_BASE_URL}/api/settings?token=${token}&provider=anthropic`, {
                     method: 'DELETE'
                 });
 

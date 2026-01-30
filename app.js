@@ -1160,13 +1160,14 @@ async function enhanceWithAI() {
 
     try {
         const token = getToken();
-        const response = await fetch(`${API_BASE_URL}/api/ai/enhance-entry`, {
+        const response = await fetch(`${API_BASE_URL}/api/ai`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 token: token,
+                action: 'enhance',
                 briefDescription: briefDescription,
                 task: task,
                 category: category
@@ -1211,13 +1212,14 @@ async function generateAIReport() {
 
     try {
         const token = getToken();
-        const response = await fetch(`${API_BASE_URL}/api/ai/generate-report`, {
+        const response = await fetch(`${API_BASE_URL}/api/ai`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 token: token,
+                action: 'generate-report',
                 startDate: startDate,
                 endDate: endDate
             })
@@ -1272,13 +1274,14 @@ async function showAIAnalysis() {
 
     try {
         const token = getToken();
-        const response = await fetch(`${API_BASE_URL}/api/ai/analyze-work`, {
+        const response = await fetch(`${API_BASE_URL}/api/ai`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
                 token: token,
+                action: 'analyze',
                 days: 30
             })
         });
