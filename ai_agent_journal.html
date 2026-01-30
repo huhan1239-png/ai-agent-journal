@@ -228,6 +228,97 @@
             display: block;
         }
 
+        /* 管理员面板样式 */
+        .admin-badge {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .admin-panel {
+            background: #fff8e1;
+            border: 2px solid #ffc107;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 30px;
+        }
+
+        .admin-panel h3 {
+            color: #1d1d1f;
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .admin-select {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            background: white;
+            cursor: pointer;
+        }
+
+        .admin-select:focus {
+            outline: none;
+            border-color: #ffc107;
+            box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.1);
+        }
+
+        .admin-info {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .admin-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .admin-info-row:last-child {
+            border-bottom: none;
+        }
+
+        .admin-info-label {
+            color: #6e6e73;
+            font-size: 14px;
+        }
+
+        .admin-info-value {
+            color: #1d1d1f;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .viewing-as-banner {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 12px 30px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
         header {
             background: linear-gradient(135deg, #0071e3 0%, #005bb5 100%);
             color: white;
@@ -1061,15 +1152,34 @@
 
     <!-- 主应用界面 -->
     <div class="app-container" id="appContainer">
+    <!-- 管理员查看提示 -->
+    <div class="viewing-as-banner" id="viewingAsBanner" style="display: none;">
+        👁️ 管理员模式：正在查看用户 <strong id="viewingUsername"></strong> 的数据
+    </div>
+
     <div class="container">
         <header>
             <h1>🤖 AI Agent 使用日志</h1>
             <p>记录每天的AI使用情况，智能生成周报</p>
             <div class="user-info">
                 <span class="username-badge" id="usernameBadge"></span>
+                <span class="admin-badge" id="adminBadge" style="display: none;">管理员</span>
                 <button class="logout-btn" onclick="handleLogout()">退出登录</button>
             </div>
         </header>
+
+        <!-- 管理员面板 -->
+        <div class="admin-panel" id="adminPanel" style="display: none;">
+            <h3>👨‍💼 管理员面板</h3>
+            <div class="admin-controls">
+                <select class="admin-select" id="userSelect" onchange="switchViewUser()">
+                    <option value="">选择要查看的用户...</option>
+                </select>
+                <button class="btn" onclick="exportUserData()" style="width: auto; margin: 0;">导出当前用户数据</button>
+                <button class="btn btn-secondary" onclick="exportAllUsersData()" style="width: auto; margin: 0;">导出所有用户数据</button>
+            </div>
+            <div class="admin-info" id="adminInfo"></div>
+        </div>
 
         <div class="tabs">
             <button class="tab active" onclick="switchTab('record')">📝 日志</button>
@@ -1174,7 +1284,7 @@
         <!-- 页脚 -->
         <footer>
             <p>Made with ❤️ by AI Agent</p>
-            <a class="changelog-link" onclick="showChangelog()">📋 查看升级日志 v1.9</a>
+            <a class="changelog-link" onclick="showChangelog()">📋 查看升级日志 v1.10</a>
         </footer>
     </div>
 
@@ -1188,8 +1298,22 @@
             <div class="modal-body">
                 <div class="changelog-item">
                     <div class="changelog-version">
-                        <h4>v1.9</h4>
+                        <h4>v1.10</h4>
                         <span class="version-badge">最新</span>
+                    </div>
+                    <div class="changelog-date">2026年1月30日</div>
+                    <ul class="changelog-features">
+                        <li><strong>管理员功能</strong>：新增管理员权限，可查看所有用户的日志数据</li>
+                        <li><strong>用户列表</strong>：管理员可查看所有注册用户和统计信息</li>
+                        <li><strong>切换查看</strong>：管理员可切换查看任意用户的完整日志和周报</li>
+                        <li><strong>数据导出</strong>：支持导出单个用户或所有用户的数据</li>
+                        <li><strong>权限标识</strong>：管理员账号显示特殊标识，方便识别</li>
+                    </ul>
+                </div>
+
+                <div class="changelog-item">
+                    <div class="changelog-version">
+                        <h4>v1.9</h4>
                     </div>
                     <div class="changelog-date">2026年1月30日</div>
                     <ul class="changelog-features">
@@ -1331,12 +1455,18 @@
     <script>
         // ==================== 账号系统 ====================
         let currentUser = null;
+        let isAdmin = false;
+        let viewingUser = null; // 管理员当前查看的用户
+
+        // 管理员账号列表（可以添加多个）
+        const ADMIN_USERS = ['admin', 'boss', 'manager'];
 
         // 初始化账号系统
         function initAuth() {
             const savedUser = localStorage.getItem('currentUser');
             if (savedUser) {
                 currentUser = savedUser;
+                isAdmin = ADMIN_USERS.includes(currentUser);
                 showApp();
             } else {
                 showAuth();
@@ -1354,6 +1484,21 @@
             document.getElementById('authContainer').classList.remove('active');
             document.getElementById('appContainer').classList.add('active');
             document.getElementById('usernameBadge').textContent = currentUser;
+
+            // 显示管理员标识和面板
+            if (isAdmin) {
+                document.getElementById('adminBadge').style.display = 'inline-block';
+                document.getElementById('adminPanel').style.display = 'block';
+                loadUserList();
+            } else {
+                document.getElementById('adminBadge').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'none';
+            }
+
+            // 重置查看用户
+            viewingUser = null;
+            document.getElementById('viewingAsBanner').style.display = 'none';
+
             initApp();
         }
 
@@ -1479,7 +1624,138 @@
 
         // 获取用户专属的localStorage键
         function getUserKey(key) {
-            return `${key}_${currentUser}`;
+            // 管理员查看其他用户时，使用被查看用户的key
+            const targetUser = viewingUser || currentUser;
+            return `${key}_${targetUser}`;
+        }
+
+        // ==================== 管理员功能 ====================
+        // 加载用户列表
+        function loadUserList() {
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+            const userSelect = document.getElementById('userSelect');
+
+            // 清空现有选项
+            userSelect.innerHTML = '<option value="">选择要查看的用户...</option>';
+
+            // 添加所有用户
+            Object.keys(users).forEach(username => {
+                // 不显示管理员账号
+                if (!ADMIN_USERS.includes(username)) {
+                    const option = document.createElement('option');
+                    option.value = username;
+                    option.textContent = username;
+                    userSelect.appendChild(option);
+                }
+            });
+
+            // 显示统计信息
+            updateAdminInfo();
+        }
+
+        // 更新管理员信息面板
+        function updateAdminInfo() {
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+            const totalUsers = Object.keys(users).filter(u => !ADMIN_USERS.includes(u)).length;
+
+            let totalEntries = 0;
+            Object.keys(users).forEach(username => {
+                if (!ADMIN_USERS.includes(username)) {
+                    const entries = JSON.parse(localStorage.getItem(`aiAgentEntries_${username}`) || '[]');
+                    totalEntries += entries.length;
+                }
+            });
+
+            const infoHTML = `
+                <div class="admin-info-row">
+                    <span class="admin-info-label">总用户数</span>
+                    <span class="admin-info-value">${totalUsers} 个</span>
+                </div>
+                <div class="admin-info-row">
+                    <span class="admin-info-label">总日志记录</span>
+                    <span class="admin-info-value">${totalEntries} 条</span>
+                </div>
+                <div class="admin-info-row">
+                    <span class="admin-info-label">当前管理员</span>
+                    <span class="admin-info-value">${currentUser}</span>
+                </div>
+            `;
+
+            document.getElementById('adminInfo').innerHTML = infoHTML;
+        }
+
+        // 切换查看用户
+        function switchViewUser() {
+            const selectedUser = document.getElementById('userSelect').value;
+
+            if (!selectedUser) {
+                // 返回管理员自己的视图
+                viewingUser = null;
+                document.getElementById('viewingAsBanner').style.display = 'none';
+            } else {
+                // 切换到查看其他用户
+                viewingUser = selectedUser;
+                document.getElementById('viewingUsername').textContent = selectedUser;
+                document.getElementById('viewingAsBanner').style.display = 'block';
+            }
+
+            // 重新加载数据
+            initApp();
+        }
+
+        // 导出当前查看用户的数据
+        function exportUserData() {
+            const targetUser = viewingUser || currentUser;
+            const entries = JSON.parse(localStorage.getItem(`aiAgentEntries_${targetUser}`) || '[]');
+            const apiKey = localStorage.getItem(`claudeApiKey_${targetUser}`);
+
+            const data = {
+                username: targetUser,
+                exportDate: new Date().toISOString(),
+                entries: entries,
+                hasApiKey: !!apiKey,
+                totalEntries: entries.length
+            };
+
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ai_agent_journal_${targetUser}_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+        }
+
+        // 导出所有用户数据
+        function exportAllUsersData() {
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+            const allData = {
+                exportDate: new Date().toISOString(),
+                exportedBy: currentUser,
+                users: {}
+            };
+
+            Object.keys(users).forEach(username => {
+                if (!ADMIN_USERS.includes(username)) {
+                    const entries = JSON.parse(localStorage.getItem(`aiAgentEntries_${username}`) || '[]');
+                    const apiKey = localStorage.getItem(`claudeApiKey_${username}`);
+
+                    allData.users[username] = {
+                        createdAt: users[username].createdAt,
+                        entries: entries,
+                        hasApiKey: !!apiKey,
+                        totalEntries: entries.length
+                    };
+                }
+            });
+
+            const dataStr = JSON.stringify(allData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ai_agent_journal_all_users_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
         }
 
         // ==================== 原有应用逻辑 ====================

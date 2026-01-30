@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据迁移工具 - AI Agent Journal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #1d1d1f;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #6e6e73;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box p {
+            color: #1565c0;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .info-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .warning-box p {
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .stats {
+            background: #f5f5f7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stats h3 {
+            color: #1d1d1f;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #6e6e73;
+            font-size: 14px;
+        }
+
+        .stat-value {
+            color: #1d1d1f;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1d1d1f;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #0071e3;
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #0071e3;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            background: #0077ed;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+        }
+
+        .btn:disabled {
+            background: #86868b;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #6e6e73;
+        }
+
+        .btn-secondary:hover {
+            background: #86868b;
+        }
+
+        .result {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result p {
+            color: #155724;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .result p:last-child {
+            margin-bottom: 0;
+        }
+
+        .error {
+            background: rgba(255, 59, 48, 0.1);
+            border-left: 4px solid #ff3b30;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .error p {
+            color: #ff3b30;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📦 数据迁移工具</h1>
+        <p class="subtitle">将旧版本的数据迁移到新的账号系统中</p>
+
+        <div class="info-box">
+            <p><strong>说明：</strong></p>
+            <p>• 此工具会将旧版本（v1.8及之前）的数据迁移到指定用户账号下</p>
+            <p>• 迁移后，原数据将保留作为备份</p>
+            <p>• 如果目标用户不存在，将自动创建</p>
+        </div>
+
+        <div class="warning-box">
+            <p><strong>⚠️ 重要提示：</strong>请设置一个安全的密码，密码至少6个字符</p>
+        </div>
+
+        <div class="stats" id="statsBox">
+            <h3>检测到的数据</h3>
+            <div class="stat-item">
+                <span class="stat-label">日志记录</span>
+                <span class="stat-value" id="entriesCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">API密钥</span>
+                <span class="stat-value" id="apiKeyStatus">未配置</span>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>目标用户名</label>
+            <input type="text" id="username" value="huhan" placeholder="请输入用户名">
+        </div>
+
+        <div class="input-group">
+            <label>设置密码</label>
+            <input type="password" id="password" placeholder="请设置密码（至少6个字符）" minlength="6">
+        </div>
+
+        <button class="btn" onclick="migrateData()">开始迁移</button>
+        <button class="btn btn-secondary" onclick="openJournal()">返回日志系统</button>
+
+        <div class="result" id="result"></div>
+        <div class="error" id="error"></div>
+    </div>
+
+    <script>
+        // 检测数据
+        function checkData() {
+            const entries = JSON.parse(localStorage.getItem('aiAgentEntries') || '[]');
+            const apiKey = localStorage.getItem('claudeApiKey');
+
+            document.getElementById('entriesCount').textContent = `${entries.length} 条`;
+            document.getElementById('apiKeyStatus').textContent = apiKey ? '已配置' : '未配置';
+
+            if (entries.length === 0 && !apiKey) {
+                showError('未检测到需要迁移的数据。如果您已经使用了新版账号系统，则无需迁移。');
+            }
+        }
+
+        // 迁移数据
+        function migrateData() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            // 验证输入
+            if (!username) {
+                showError('请输入用户名');
+                return;
+            }
+
+            if (username.length < 3 || username.length > 20) {
+                showError('用户名长度必须在3-20个字符之间');
+                return;
+            }
+
+            if (!password) {
+                showError('请输入密码');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('密码长度至少为6个字符');
+                return;
+            }
+
+            // 读取旧数据
+            const oldEntries = localStorage.getItem('aiAgentEntries');
+            const oldApiKey = localStorage.getItem('claudeApiKey');
+
+            if (!oldEntries && !oldApiKey) {
+                showError('未找到需要迁移的数据');
+                return;
+            }
+
+            // 创建或更新用户
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+            if (!users[username]) {
+                users[username] = {
+                    password: btoa(password),
+                    createdAt: new Date().toISOString()
+                };
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+
+            // 迁移数据
+            if (oldEntries) {
+                localStorage.setItem(`aiAgentEntries_${username}`, oldEntries);
+            }
+
+            if (oldApiKey) {
+                localStorage.setItem(`claudeApiKey_${username}`, oldApiKey);
+            }
+
+            // 设置当前用户
+            localStorage.setItem('currentUser', username);
+
+            // 显示结果
+            const entries = JSON.parse(oldEntries || '[]');
+            let resultHTML = '<p><strong>✅ 迁移成功！</strong></p>';
+            resultHTML += `<p>• 已将 ${entries.length} 条日志记录迁移到用户 "${username}"</p>`;
+            if (oldApiKey) {
+                resultHTML += `<p>• 已迁移 API 密钥配置</p>`;
+            }
+            resultHTML += `<p>• 用户 "${username}" ${users[username] ? '已存在，数据已更新' : '已创建'}</p>`;
+            resultHTML += `<p><br>现在可以返回日志系统并使用用户名 "${username}" 登录</p>`;
+
+            document.getElementById('result').innerHTML = resultHTML;
+            document.getElementById('result').classList.add('show');
+            document.getElementById('error').classList.remove('show');
+        }
+
+        // 显示错误
+        function showError(message) {
+            document.getElementById('error').innerHTML = `<p>${message}</p>`;
+            document.getElementById('error').classList.add('show');
+            document.getElementById('result').classList.remove('show');
+        }
+
+        // 打开日志系统
+        function openJournal() {
+            window.location.href = 'ai_agent_journal.html';
+        }
+
+        // 页面加载时检测数据
+        window.addEventListener('DOMContentLoaded', checkData);
+    </script>
+</body>
+</html>
