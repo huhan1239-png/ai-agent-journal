@@ -190,11 +190,18 @@
 
         .user-info {
             display: flex;
-            align-items: center;
-            gap: 15px;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 10px;
             position: absolute;
             top: 40px;
             right: 30px;
+        }
+
+        .user-info-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .username-badge {
@@ -209,9 +216,9 @@
             background: rgba(255, 255, 255, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 13px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -1103,11 +1110,15 @@
             <h1>🤖 空间智能部-Agent实战之路</h1>
             <p>记录每天的AI使用情况，智能生成周报</p>
             <div class="user-info">
-                <span class="username-badge" id="usernameBadge"></span>
-                <span class="admin-badge" id="adminBadge" style="display: none;">管理员</span>
-                <button class="logout-btn" onclick="window.location.href='ai-settings.html'" style="background: #ff9500; margin-right: 10px;">🤖 AI设置</button>
-                <button class="logout-btn" onclick="showChangePasswordDialog()" style="background: #0071e3; margin-right: 10px;">修改密码</button>
-                <button class="logout-btn" onclick="handleLogout()">退出登录</button>
+                <div class="user-info-row">
+                    <span class="username-badge" id="usernameBadge"></span>
+                    <span class="admin-badge" id="adminBadge" style="display: none;">管理员</span>
+                </div>
+                <div class="user-info-row">
+                    <button class="logout-btn" onclick="window.location.href='ai-settings.html'" style="background: #ff9500;">🤖 AI设置</button>
+                    <button class="logout-btn" onclick="showChangePasswordDialog()" style="background: #0071e3;">修改密码</button>
+                    <button class="logout-btn" onclick="handleLogout()">退出登录</button>
+                </div>
             </div>
         </header>
 
