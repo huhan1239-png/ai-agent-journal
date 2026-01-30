@@ -1,5 +1,5 @@
-import { query } from '../db.js';
-import jwt from 'jsonwebtoken';
+const { query } = require('../db.js');
+const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
@@ -11,7 +11,7 @@ function verifyToken(token) {
   }
 }
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // 设置 CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');

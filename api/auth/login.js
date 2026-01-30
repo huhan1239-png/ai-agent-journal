@@ -1,10 +1,10 @@
-import { query } from '../db.js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+const { query } = require('../db.js');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   // 设置 CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
