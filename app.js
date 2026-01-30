@@ -242,7 +242,7 @@ function handleLogout() {
 async function loadUserList() {
     try {
         const token = getToken();
-        const response = await fetch(`${API_BASE_URL}/api/admin/users?token=${token}`);
+        const response = await fetch(`${API_BASE_URL}/api/admin?action=users&token=${token}`);
         const data = await response.json();
 
         if (!response.ok) {
@@ -302,7 +302,7 @@ async function switchViewUser() {
     } else {
         try {
             const token = getToken();
-            const response = await fetch(`${API_BASE_URL}/api/admin/user-entries?userId=${selectedUserId}&token=${token}`);
+            const response = await fetch(`${API_BASE_URL}/api/admin?action=user-entries&userId=${selectedUserId}&token=${token}`);
             const data = await response.json();
 
             if (response.ok) {
@@ -356,7 +356,7 @@ async function exportUserData() {
 async function exportAllUsersData() {
     try {
         const token = getToken();
-        const response = await fetch(`${API_BASE_URL}/api/admin/users?token=${token}`);
+        const response = await fetch(`${API_BASE_URL}/api/admin?action=users&token=${token}`);
         const data = await response.json();
 
         if (!response.ok) {
@@ -595,7 +595,7 @@ document.getElementById('entryForm').addEventListener('submit', async function(e
             images: currentImages
         };
 
-        const response = await fetch(`${API_BASE_URL}/api/entries/create`, {
+        const response = await fetch(`${API_BASE_URL}/api/entries`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -653,11 +653,11 @@ async function loadEntries() {
 
     try {
         const token = getToken();
-        let url = `${API_BASE_URL}/api/entries/list?token=${token}`;
+        let url = `${API_BASE_URL}/api/entries?token=${token}`;
 
         // 如果是管理员查看其他用户
         if (viewingUser) {
-            url = `${API_BASE_URL}/api/admin/user-entries?userId=${viewingUser.id}&token=${token}`;
+            url = `${API_BASE_URL}/api/admin?action=user-entries&userId=${viewingUser.id}&token=${token}`;
         }
 
         const response = await fetch(url);
@@ -713,7 +713,7 @@ async function deleteEntry(id) {
 
     try {
         const token = getToken();
-        const response = await fetch(`${API_BASE_URL}/api/entries/delete?id=${id}&token=${token}`, {
+        const response = await fetch(`${API_BASE_URL}/api/entries?id=${id}&token=${token}`, {
             method: 'DELETE'
         });
 
@@ -1110,7 +1110,7 @@ async function handleResetPassword(userId, username) {
 
     try {
         const token = getToken();
-        const response = await fetch(`${API_BASE_URL}/api/admin/reset-password`, {
+        const response = await fetch(`${API_BASE_URL}/api/admin`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
