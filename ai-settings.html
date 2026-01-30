@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI 设置 - AI Agent Journal</title>
+    <title>AI 功能设置 - 多模型支持</title>
     <style>
         * {
             margin: 0;
@@ -25,9 +25,11 @@
             background: white;
             border-radius: 20px;
             padding: 40px;
-            max-width: 700px;
+            max-width: 800px;
             width: 100%;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         h1 {
@@ -42,104 +44,117 @@
             line-height: 1.6;
         }
 
-        .info-box {
+        .provider-selector {
+            margin-bottom: 30px;
+        }
+
+        .provider-selector label {
+            display: block;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .provider-selector select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            background: white;
+            cursor: pointer;
+        }
+
+        .provider-info {
             background: #e3f2fd;
             border-left: 4px solid #2196f3;
             padding: 15px;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin: 20px 0;
         }
 
-        .info-box p {
-            color: #1565c0;
+        .provider-info h3 {
+            color: #1d1d1f;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .provider-info p {
+            color: #6e6e73;
             font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 8px;
+            margin: 5px 0;
         }
 
-        .info-box a {
-            color: #0071e3;
+        .provider-info a {
+            color: #2196f3;
             text-decoration: none;
-            font-weight: 500;
         }
 
-        .info-box a:hover {
+        .provider-info a:hover {
             text-decoration: underline;
-        }
-
-        .status-box {
-            background: #f5f5f7;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-
-        .status-box.has-key {
-            background: #d4edda;
-            border-left: 4px solid #28a745;
-        }
-
-        .status-box.no-key {
-            background: #fff3cd;
-            border-left: 4px solid #ffc107;
         }
 
         .form-group {
             margin-bottom: 20px;
         }
 
-        label {
+        .form-group label {
             display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
+            font-weight: 600;
             color: #1d1d1f;
+            margin-bottom: 8px;
         }
 
-        input {
+        .form-group input {
             width: 100%;
             padding: 12px 16px;
             border: 1px solid rgba(0, 0, 0, 0.12);
             border-radius: 10px;
             font-size: 15px;
-            font-family: 'Monaco', 'Courier New', monospace;
+            font-family: inherit;
+        }
+
+        .hint {
+            color: #6e6e73;
+            font-size: 13px;
+            margin-top: 5px;
         }
 
         .btn {
-            width: 100%;
-            padding: 14px;
-            background: #0071e3;
-            color: white;
+            padding: 12px 24px;
             border: none;
             border-radius: 10px;
             font-size: 15px;
             font-weight: 500;
             cursor: pointer;
+            font-family: inherit;
+            margin-right: 10px;
             transition: all 0.3s ease;
-            margin-bottom: 10px;
         }
 
-        .btn:hover {
-            background: #0077ed;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+        .btn-primary {
+            background: #2196f3;
+            color: white;
         }
 
-        .btn:disabled {
-            background: #86868b;
-            cursor: not-allowed;
-            transform: none;
+        .btn-primary:hover {
+            background: #1976d2;
         }
 
         .btn-danger {
-            background: #ff3b30;
+            background: #dc3545;
+            color: white;
         }
 
         .btn-danger:hover {
-            background: #ff4940;
+            background: #c82333;
         }
 
         .btn-secondary {
             background: #6e6e73;
+            color: white;
         }
 
         .btn-secondary:hover {
@@ -169,140 +184,231 @@
             border-left: 4px solid #dc3545;
         }
 
-        .hint {
+        .configured-providers {
+            margin-top: 40px;
+        }
+
+        .configured-providers h2 {
+            color: #1d1d1f;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .provider-card {
+            background: #f5f5f7;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .provider-card-info {
+            flex: 1;
+        }
+
+        .provider-card-name {
+            font-weight: 600;
+            color: #1d1d1f;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .provider-card-key {
             color: #6e6e73;
             font-size: 13px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .provider-card-date {
+            color: #86868b;
+            font-size: 12px;
             margin-top: 5px;
         }
 
-        .feature-list {
-            background: #f5f5f7;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 30px;
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #86868b;
         }
 
-        .feature-list h3 {
-            color: #1d1d1f;
-            font-size: 18px;
-            margin-bottom: 15px;
+        .provider-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 10px;
         }
 
-        .feature-list ul {
-            list-style: none;
-            padding: 0;
+        .provider-badge.anthropic {
+            background: #ff9500;
+            color: white;
         }
 
-        .feature-list li {
-            color: #6e6e73;
-            font-size: 14px;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        .provider-badge.openai {
+            background: #10a37f;
+            color: white;
         }
 
-        .feature-list li:last-child {
-            border-bottom: none;
+        .provider-badge.google {
+            background: #4285f4;
+            color: white;
         }
 
-        .feature-list li::before {
-            content: "✨ ";
-            margin-right: 8px;
+        .provider-badge.ollama {
+            background: #6366f1;
+            color: white;
+        }
+
+        .provider-badge.deepseek {
+            background: #8b5cf6;
+            color: white;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🤖 AI 功能设置</h1>
-        <p class="subtitle">配置 Claude API Key 以启用 AI 智能功能</p>
+        <p class="subtitle">配置多个 AI 模型的 API Key，享受更灵活的 AI 辅助功能</p>
 
-        <div class="info-box">
-            <p><strong>获取 API Key：</strong></p>
-            <p>1. 访问 <a href="https://console.anthropic.com/" target="_blank">Anthropic Console</a></p>
-            <p>2. 注册/登录账号</p>
-            <p>3. 点击 "API Keys" → "Create Key"</p>
-            <p>4. 复制生成的 API Key（格式：sk-ant-api03-...）</p>
+        <div class="provider-selector">
+            <label>选择 AI 模型:</label>
+            <select id="providerSelect" onchange="updateProviderInfo()">
+                <option value="anthropic">Claude (Anthropic)</option>
+                <option value="openai">ChatGPT (OpenAI)</option>
+                <option value="google">Gemini (Google)</option>
+                <option value="ollama">Ollama (本地模型)</option>
+                <option value="deepseek">DeepSeek</option>
+            </select>
         </div>
 
-        <div class="status-box" id="statusBox">
-            <p id="statusText">正在检查 API Key 状态...</p>
+        <div id="providerInfo" class="provider-info">
+            <!-- 动态更新 -->
         </div>
 
         <div class="message" id="message"></div>
 
         <div class="form-group">
-            <label>Claude API Key:</label>
-            <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-...">
-            <p class="hint">API Key 将加密存储在云端，仅用于调用 AI 功能</p>
+            <label id="inputLabel">API Key / Base URL:</label>
+            <input type="text" id="apiKeyInput" placeholder="">
+            <p class="hint" id="inputHint">API Key 将加密存储在云端，仅用于调用 AI 功能</p>
         </div>
 
-        <button class="btn" id="saveBtn" onclick="saveApiKey()">保存 API Key</button>
-        <button class="btn btn-danger" id="deleteBtn" onclick="deleteApiKey()" style="display: none;">删除 API Key</button>
+        <button class="btn btn-primary" id="saveBtn" onclick="saveApiKey()">保存配置</button>
         <button class="btn btn-secondary" onclick="window.location.href='index.html'">返回主页</button>
 
-        <div class="feature-list">
-            <h3>启用 AI 功能后，你可以：</h3>
-            <ul>
-                <li>AI 辅助写日志 - 输入简要描述，AI 扩展为完整专业的日志</li>
-                <li>AI 生成周报 - 基于本周所有日志，自动生成专业周报</li>
-                <li>AI 智能分析 - 分析工作时间分配、效率趋势，提供改进建议</li>
-                <li>AI 分类建议 - 输入任务后，AI 建议最合适的分类</li>
-            </ul>
+        <div class="configured-providers">
+            <h2>已配置的模型</h2>
+            <div id="providersList">
+                <div class="empty-state">正在加载...</div>
+            </div>
         </div>
     </div>
 
     <script>
         const API_BASE_URL = window.location.origin;
 
-        // 页面加载时检查 API Key 状态
-        window.onload = async function() {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                alert('请先登录');
-                window.location.href = 'index.html';
-                return;
+        const PROVIDER_INFO = {
+            anthropic: {
+                name: 'Claude (Anthropic)',
+                description: 'Claude 是 Anthropic 开发的强大 AI 助手，擅长理解复杂任务',
+                getKeyUrl: 'https://console.anthropic.com/',
+                placeholder: 'sk-ant-api03-...',
+                hint: 'API Key 格式：sk-ant-api03-...',
+                inputLabel: 'Claude API Key:',
+                steps: [
+                    '1. 访问 <a href="https://console.anthropic.com/" target="_blank">Anthropic Console</a>',
+                    '2. 注册/登录账号',
+                    '3. 点击 "API Keys" → "Create Key"',
+                    '4. 复制生成的 API Key'
+                ]
+            },
+            openai: {
+                name: 'ChatGPT (OpenAI)',
+                description: 'GPT-4 和 GPT-3.5 是目前最流行的 AI 模型',
+                getKeyUrl: 'https://platform.openai.com/api-keys',
+                placeholder: 'sk-proj-...',
+                hint: 'API Key 格式：sk-proj-... 或 sk-...',
+                inputLabel: 'OpenAI API Key:',
+                steps: [
+                    '1. 访问 <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI API Keys</a>',
+                    '2. 注册/登录账号',
+                    '3. 点击 "Create new secret key"',
+                    '4. 复制生成的 API Key'
+                ]
+            },
+            google: {
+                name: 'Gemini (Google)',
+                description: 'Google 最新的多模态 AI 模型',
+                getKeyUrl: 'https://aistudio.google.com/app/apikey',
+                placeholder: 'AIzaSy...',
+                hint: 'API Key 格式：AIzaSy...',
+                inputLabel: 'Google API Key:',
+                steps: [
+                    '1. 访问 <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>',
+                    '2. 登录 Google 账号',
+                    '3. 点击 "Get API Key"',
+                    '4. 复制生成的 API Key'
+                ]
+            },
+            ollama: {
+                name: 'Ollama (本地模型)',
+                description: '在本地运行大语言模型，完全免费且保护隐私',
+                getKeyUrl: 'https://ollama.com/',
+                placeholder: 'http://localhost:11434',
+                hint: '输入 Ollama 服务地址，默认：http://localhost:11434',
+                inputLabel: 'Ollama Base URL:',
+                steps: [
+                    '1. 访问 <a href="https://ollama.com/" target="_blank">Ollama 官网</a>下载安装',
+                    '2. 安装后运行 ollama serve',
+                    '3. 下载模型：ollama pull llama2',
+                    '4. 输入服务地址（通常是 http://localhost:11434）'
+                ]
+            },
+            deepseek: {
+                name: 'DeepSeek',
+                description: 'DeepSeek 是一款高性价比的中文 AI 模型',
+                getKeyUrl: 'https://platform.deepseek.com/api_keys',
+                placeholder: 'sk-...',
+                hint: 'API Key 格式：sk-...',
+                inputLabel: 'DeepSeek API Key:',
+                steps: [
+                    '1. 访问 <a href="https://platform.deepseek.com/api_keys" target="_blank">DeepSeek Platform</a>',
+                    '2. 注册/登录账号',
+                    '3. 创建 API Key',
+                    '4. 复制生成的 API Key'
+                ]
             }
-
-            await checkApiKeyStatus();
         };
 
-        // 检查 API Key 状态
-        async function checkApiKeyStatus() {
-            try {
-                const token = localStorage.getItem('authToken');
-                const response = await fetch(`${API_BASE_URL}/api/settings?token=${token}&provider=anthropic`);
-                const data = await response.json();
+        function updateProviderInfo() {
+            const provider = document.getElementById('providerSelect').value;
+            const info = PROVIDER_INFO[provider];
 
-                const statusBox = document.getElementById('statusBox');
-                const statusText = document.getElementById('statusText');
-                const deleteBtn = document.getElementById('deleteBtn');
+            // 更新说明信息
+            const providerInfoDiv = document.getElementById('providerInfo');
+            providerInfoDiv.innerHTML = `
+                <h3>${info.name}</h3>
+                <p>${info.description}</p>
+                <p><strong>获取 API Key：</strong></p>
+                ${info.steps.map(step => `<p>${step}</p>`).join('')}
+            `;
 
-                if (data.hasApiKey) {
-                    statusBox.className = 'status-box has-key';
-                    statusText.innerHTML = `✅ 已配置 API Key<br><small style="color: #6e6e73;">掩码：${data.apiKey}</small>`;
-                    deleteBtn.style.display = 'block';
-                } else {
-                    statusBox.className = 'status-box no-key';
-                    statusText.textContent = '⚠️ 尚未配置 API Key，请在下方输入并保存';
-                    deleteBtn.style.display = 'none';
-                }
-
-            } catch (error) {
-                console.error('Check API key error:', error);
-                showMessage('检查状态失败', 'error');
-            }
+            // 更新输入框
+            document.getElementById('inputLabel').textContent = info.inputLabel;
+            document.getElementById('apiKeyInput').placeholder = info.placeholder;
+            document.getElementById('inputHint').textContent = info.hint;
+            document.getElementById('apiKeyInput').value = '';
         }
 
-        // 保存 API Key
         async function saveApiKey() {
+            const provider = document.getElementById('providerSelect').value;
             const apiKey = document.getElementById('apiKeyInput').value.trim();
 
             if (!apiKey) {
-                showMessage('请输入 API Key', 'error');
-                return;
-            }
-
-            if (!apiKey.startsWith('sk-ant-')) {
-                showMessage('API Key 格式错误（应以 sk-ant- 开头）', 'error');
+                showMessage('请输入 API Key 或 Base URL', 'error');
                 return;
             }
 
@@ -312,6 +418,11 @@
 
             try {
                 const token = localStorage.getItem('authToken');
+                if (!token) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
                 const response = await fetch(`${API_BASE_URL}/api/settings`, {
                     method: 'POST',
                     headers: {
@@ -320,7 +431,7 @@
                     body: JSON.stringify({
                         token: token,
                         apiKey: apiKey,
-                        provider: 'anthropic'
+                        provider: provider
                     })
                 });
 
@@ -331,32 +442,31 @@
                     return;
                 }
 
-                showMessage('✅ API Key 保存成功！现在可以使用 AI 功能了', 'success');
+                showMessage(`✅ ${PROVIDER_INFO[provider].name} 配置成功！`, 'success');
                 document.getElementById('apiKeyInput').value = '';
-                await checkApiKeyStatus();
+
+                // 刷新已配置列表
+                setTimeout(() => {
+                    loadConfiguredProviders();
+                }, 500);
 
             } catch (error) {
                 console.error('Save API key error:', error);
                 showMessage('保存失败，请检查网络连接', 'error');
             } finally {
                 saveBtn.disabled = false;
-                saveBtn.textContent = '保存 API Key';
+                saveBtn.textContent = '保存配置';
             }
         }
 
-        // 删除 API Key
-        async function deleteApiKey() {
-            if (!confirm('确定要删除 API Key 吗？删除后将无法使用 AI 功能。')) {
+        async function deleteProvider(provider) {
+            if (!confirm(`确定要删除 ${PROVIDER_INFO[provider].name} 的配置吗？`)) {
                 return;
             }
 
-            const deleteBtn = document.getElementById('deleteBtn');
-            deleteBtn.disabled = true;
-            deleteBtn.textContent = '删除中...';
-
             try {
                 const token = localStorage.getItem('authToken');
-                const response = await fetch(`${API_BASE_URL}/api/settings?token=${token}&provider=anthropic`, {
+                const response = await fetch(`${API_BASE_URL}/api/settings?provider=${provider}&token=${token}`, {
                     method: 'DELETE'
                 });
 
@@ -367,28 +477,78 @@
                     return;
                 }
 
-                showMessage('✅ API Key 已删除', 'success');
-                await checkApiKeyStatus();
+                showMessage(`✅ ${PROVIDER_INFO[provider].name} 配置已删除`, 'success');
+                loadConfiguredProviders();
 
             } catch (error) {
-                console.error('Delete API key error:', error);
+                console.error('Delete provider error:', error);
                 showMessage('删除失败，请检查网络连接', 'error');
-            } finally {
-                deleteBtn.disabled = false;
-                deleteBtn.textContent = '删除 API Key';
             }
         }
 
-        // 显示消息
+        async function loadConfiguredProviders() {
+            const providersList = document.getElementById('providersList');
+            providersList.innerHTML = '<div class="empty-state">加载中...</div>';
+
+            try {
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/api/settings?action=list&token=${token}`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    providersList.innerHTML = '<div class="empty-state">加载失败</div>';
+                    return;
+                }
+
+                if (data.providers.length === 0) {
+                    providersList.innerHTML = '<div class="empty-state">还未配置任何 AI 模型<br>请在上方选择并配置</div>';
+                    return;
+                }
+
+                // 显示已配置的providers
+                providersList.innerHTML = data.providers.map(p => {
+                    const info = PROVIDER_INFO[p.provider];
+                    const date = new Date(p.createdAt).toLocaleString('zh-CN');
+                    return `
+                        <div class="provider-card">
+                            <div class="provider-card-info">
+                                <div class="provider-card-name">
+                                    <span class="provider-badge ${p.provider}">${info.name}</span>
+                                    ✓ 已配置
+                                </div>
+                                <div class="provider-card-date">配置时间：${date}</div>
+                            </div>
+                            <button class="btn btn-danger" onclick="deleteProvider('${p.provider}')">删除</button>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                console.error('Load providers error:', error);
+                providersList.innerHTML = '<div class="empty-state">加载失败</div>';
+            }
+        }
+
         function showMessage(text, type) {
-            const message = document.getElementById('message');
-            message.textContent = text;
-            message.className = `message ${type} show`;
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type} show`;
 
             setTimeout(() => {
-                message.classList.remove('show');
+                messageDiv.classList.remove('show');
             }, 5000);
         }
+
+        // 页面加载时初始化
+        window.onload = function() {
+            updateProviderInfo();
+            loadConfiguredProviders();
+        };
     </script>
 </body>
 </html>
