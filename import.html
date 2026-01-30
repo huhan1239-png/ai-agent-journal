@@ -128,6 +128,28 @@
             font-size: 14px;
         }
 
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 10px;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #1d1d1f;
+        }
+
+        .input-hint {
+            color: #6e6e73;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
         .btn {
             width: 100%;
             padding: 14px;
@@ -222,27 +244,73 @@
         .preview-item:last-child {
             border-bottom: none;
         }
+
+        .progress {
+            background: #f5f5f7;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .progress.show {
+            display: block;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar-fill {
+            background: #0071e3;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            color: #6e6e73;
+            font-size: 13px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>📥 数据导入工具</h1>
-        <p class="subtitle">将本地导出的数据导入到当前浏览器</p>
+        <p class="subtitle">将本地导出的数据导入到云端数据库</p>
 
         <div class="info-box">
             <p><strong>使用说明：</strong></p>
-            <p>1. 在本地浏览器导出数据（导出当前用户数据）</p>
-            <p>2. 在 Vercel 网站上打开此页面</p>
-            <p>3. 上传导出的 JSON 文件</p>
-            <p>4. 选择要导入到哪个用户账号下</p>
+            <p>1. 先登录到要导入数据的账号</p>
+            <p>2. 选择之前导出的 JSON 文件</p>
+            <p>3. 点击"开始导入"，数据会自动上传到云端</p>
         </div>
 
         <div class="warning-box">
-            <p><strong>⚠️ 注意：</strong>如果目标用户已有数据，导入将会合并（不会覆盖现有数据）</p>
+            <p><strong>⚠️ 注意：</strong>导入会将数据添加到当前登录用户的账号下（不会覆盖现有数据）</p>
         </div>
 
         <div class="step">
-            <div class="step-title">步骤 1: 选择导出的数据文件</div>
+            <div class="step-title">步骤 1: 登录账号</div>
+            <div class="step-content">
+                <label class="input-label">用户名：</label>
+                <input type="text" id="loginUsername" class="input-field" placeholder="输入用户名">
+
+                <label class="input-label">密码：</label>
+                <input type="password" id="loginPassword" class="input-field" placeholder="输入密码">
+
+                <button class="btn" onclick="handleLogin()">登录</button>
+                <div id="loginStatus" style="margin-top: 10px; color: #6e6e73; font-size: 14px;"></div>
+            </div>
+        </div>
+
+        <div class="step" id="uploadStep" style="display: none;">
+            <div class="step-title">步骤 2: 选择导出的数据文件</div>
             <div class="file-input-area" id="fileInputArea" onclick="document.getElementById('fileInput').click()">
                 <input type="file" id="fileInput" accept=".json" onchange="handleFileSelect(event)">
                 <div class="file-input-text">📁 点击选择文件或拖拽文件到这里</div>
@@ -251,40 +319,87 @@
             <div class="preview" id="preview"></div>
         </div>
 
-        <div class="step">
-            <div class="step-title">步骤 2: 选择目标用户</div>
-            <div class="step-content">
-                <label style="display: block; margin-bottom: 10px; font-weight: 500; color: #1d1d1f;">
-                    导入到用户：
-                </label>
-                <input type="text" id="targetUsername" placeholder="输入用户名（例如：huhan）"
-                       style="width: 100%; padding: 12px 16px; border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 10px; font-size: 15px;">
-                <p style="color: #6e6e73; font-size: 13px; margin-top: 8px;">
-                    如果用户不存在，会自动创建（需要设置密码）
-                </p>
-            </div>
-        </div>
-
-        <div class="step" id="passwordStep" style="display: none;">
-            <div class="step-title">步骤 3: 设置用户密码</div>
-            <div class="step-content">
-                <label style="display: block; margin-bottom: 10px; font-weight: 500; color: #1d1d1f;">
-                    密码（至少6个字符）：
-                </label>
-                <input type="password" id="userPassword" placeholder="为新用户设置密码"
-                       style="width: 100%; padding: 12px 16px; border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 10px; font-size: 15px;">
-            </div>
-        </div>
-
-        <button class="btn" id="importBtn" onclick="importData()" disabled>开始导入</button>
+        <button class="btn" id="importBtn" onclick="importData()" disabled style="display: none;">开始导入</button>
         <button class="btn btn-secondary" onclick="openJournal()">返回日志系统</button>
+
+        <div class="progress" id="progress">
+            <div class="progress-bar">
+                <div class="progress-bar-fill" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">正在导入...</div>
+        </div>
 
         <div class="result" id="result"></div>
         <div class="error" id="error"></div>
     </div>
 
     <script>
+        const API_BASE_URL = window.location.origin;
+        let currentToken = null;
+        let currentUser = null;
         let selectedData = null;
+
+        // 检查是否已登录
+        window.onload = function() {
+            const token = localStorage.getItem('authToken');
+            if (token) {
+                currentToken = token;
+                // 尝试验证token
+                fetch(`${API_BASE_URL}/api/entries/list?token=${token}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById('loginStatus').innerHTML = '✅ 已登录';
+                            document.getElementById('uploadStep').style.display = 'block';
+                            document.getElementById('importBtn').style.display = 'block';
+                        }
+                    })
+                    .catch(() => {
+                        localStorage.removeItem('authToken');
+                    });
+            }
+        };
+
+        // 登录
+        async function handleLogin() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!username || !password) {
+                showError('请输入用户名和密码');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showError(data.error || '登录失败');
+                    return;
+                }
+
+                currentToken = data.token;
+                currentUser = data.user;
+                localStorage.setItem('authToken', currentToken);
+
+                document.getElementById('loginStatus').innerHTML = `✅ 已登录为：${username}`;
+                document.getElementById('uploadStep').style.display = 'block';
+                document.getElementById('importBtn').style.display = 'block';
+                hideError();
+
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('登录失败，请检查网络连接');
+            }
+        }
 
         // 拖拽上传
         const fileInputArea = document.getElementById('fileInputArea');
@@ -330,17 +445,12 @@
 
                     // 显示预览
                     let previewHTML = '<div class="step-title">文件内容预览</div>';
-                    previewHTML += `<div class="preview-item"><strong>用户名：</strong>${data.username || '未指定'}</div>`;
+                    previewHTML += `<div class="preview-item"><strong>原用户名：</strong>${data.username || '未指定'}</div>`;
                     previewHTML += `<div class="preview-item"><strong>日志记录：</strong>${data.entries ? data.entries.length : 0} 条</div>`;
                     previewHTML += `<div class="preview-item"><strong>导出时间：</strong>${data.exportDate || '未知'}</div>`;
 
                     document.getElementById('preview').innerHTML = previewHTML;
                     document.getElementById('preview').classList.add('show');
-
-                    // 自动填充用户名
-                    if (data.username) {
-                        document.getElementById('targetUsername').value = data.username;
-                    }
 
                     // 启用导入按钮
                     document.getElementById('importBtn').disabled = false;
@@ -354,100 +464,86 @@
             reader.readAsText(file);
         }
 
-        // 检查用户名变化
-        document.getElementById('targetUsername').addEventListener('input', function() {
-            const username = this.value.trim();
-            const users = JSON.parse(localStorage.getItem('users') || '{}');
-
-            if (username && !users[username]) {
-                document.getElementById('passwordStep').style.display = 'block';
-            } else {
-                document.getElementById('passwordStep').style.display = 'none';
-            }
-        });
-
         // 导入数据
-        function importData() {
+        async function importData() {
+            if (!currentToken) {
+                showError('请先登录');
+                return;
+            }
+
             if (!selectedData) {
                 showError('请先选择要导入的文件');
                 return;
             }
 
-            const targetUsername = document.getElementById('targetUsername').value.trim();
+            const entries = selectedData.entries || [];
 
-            if (!targetUsername) {
-                showError('请输入目标用户名');
+            if (entries.length === 0) {
+                showError('没有可导入的日志记录');
                 return;
             }
 
-            if (targetUsername.length < 3 || targetUsername.length > 20) {
-                showError('用户名长度必须在3-20个字符之间');
-                return;
-            }
+            // 显示进度
+            document.getElementById('progress').classList.add('show');
+            document.getElementById('importBtn').disabled = true;
 
-            // 检查用户是否存在
-            const users = JSON.parse(localStorage.getItem('users') || '{}');
+            let successCount = 0;
+            let failCount = 0;
 
-            if (!users[targetUsername]) {
-                const password = document.getElementById('userPassword').value;
+            for (let i = 0; i < entries.length; i++) {
+                const entry = entries[i];
 
-                if (!password) {
-                    showError('请为新用户设置密码');
-                    return;
+                // 更新进度
+                const progress = ((i + 1) / entries.length) * 100;
+                document.getElementById('progressBar').style.width = progress + '%';
+                document.getElementById('progressText').textContent = `正在导入 ${i + 1}/${entries.length}...`;
+
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/entries/create`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            token: currentToken,
+                            date: entry.date,
+                            category: entry.category,
+                            task: entry.task,
+                            description: entry.description,
+                            duration: entry.duration,
+                            images: entry.images || []
+                        })
+                    });
+
+                    if (response.ok) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                    }
+
+                } catch (error) {
+                    console.error('Import entry error:', error);
+                    failCount++;
                 }
 
-                if (password.length < 6) {
-                    showError('密码长度至少为6个字符');
-                    return;
-                }
-
-                // 创建新用户
-                users[targetUsername] = {
-                    password: btoa(password),
-                    createdAt: new Date().toISOString()
-                };
-                localStorage.setItem('users', JSON.stringify(users));
+                // 避免请求过快
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
 
-            // 导入数据
-            const existingEntries = JSON.parse(localStorage.getItem(`aiAgentEntries_${targetUsername}`) || '[]');
-            const newEntries = selectedData.entries || [];
-
-            // 合并数据（去重）
-            const allEntries = [...existingEntries];
-            const existingIds = new Set(existingEntries.map(e => e.id));
-
-            newEntries.forEach(entry => {
-                if (!existingIds.has(entry.id)) {
-                    allEntries.push(entry);
-                }
-            });
-
-            // 保存数据
-            localStorage.setItem(`aiAgentEntries_${targetUsername}`, JSON.stringify(allEntries));
-
-            // 如果有 API 密钥
-            if (selectedData.hasApiKey && selectedData.apiKey) {
-                localStorage.setItem(`claudeApiKey_${targetUsername}`, selectedData.apiKey);
-            }
+            // 隐藏进度
+            document.getElementById('progress').classList.remove('show');
 
             // 显示结果
-            const newCount = allEntries.length - existingEntries.length;
-            let resultHTML = '<p><strong>✅ 导入成功！</strong></p>';
-            resultHTML += `<p>• 目标用户：${targetUsername}</p>`;
-            resultHTML += `<p>• 导入记录：${newCount} 条新记录</p>`;
-            resultHTML += `<p>• 总记录数：${allEntries.length} 条</p>`;
-            if (!users[targetUsername]) {
-                resultHTML += `<p>• 新用户已创建</p>`;
+            let resultHTML = '<p><strong>✅ 导入完成！</strong></p>';
+            resultHTML += `<p>• 成功导入：${successCount} 条</p>`;
+            if (failCount > 0) {
+                resultHTML += `<p>• 失败：${failCount} 条</p>`;
             }
-            resultHTML += `<p><br>现在可以返回日志系统并使用用户名 "${targetUsername}" 登录</p>`;
+            resultHTML += `<p><br>现在可以返回日志系统查看导入的数据</p>`;
 
             document.getElementById('result').innerHTML = resultHTML;
             document.getElementById('result').classList.add('show');
             document.getElementById('error').classList.remove('show');
-
-            // 禁用导入按钮
-            document.getElementById('importBtn').disabled = true;
         }
 
         // 显示错误
