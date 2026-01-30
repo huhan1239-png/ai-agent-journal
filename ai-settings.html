@@ -341,16 +341,16 @@
             },
             google: {
                 name: 'Gemini (Google)',
-                description: 'Google 最新的多模态 AI 模型',
+                description: 'Google 最新的多模态 AI 模型（使用 Gemini 1.5 Flash）',
                 getKeyUrl: 'https://aistudio.google.com/app/apikey',
                 placeholder: 'AIzaSy...',
-                hint: 'API Key 格式：AIzaSy...',
+                hint: 'API Key 格式：AIzaSy...（支持 Gemini 1.5 Flash 模型）',
                 inputLabel: 'Google API Key:',
                 steps: [
                     '1. 访问 <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>',
                     '2. 登录 Google 账号',
-                    '3. 点击 "Get API Key"',
-                    '4. 复制生成的 API Key'
+                    '3. 点击 "Get API Key" 或 "Create API Key"',
+                    '4. 复制生成的 API Key（格式：AIzaSy...）'
                 ]
             },
             ollama: {
