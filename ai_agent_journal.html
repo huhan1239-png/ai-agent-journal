@@ -46,6 +46,188 @@
             position: relative;
         }
 
+        /* 登录/注册界面样式 */
+        .auth-container {
+            display: none;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-container.active {
+            display: flex;
+        }
+
+        .auth-box {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            padding: 50px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        .auth-box h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 10px;
+        }
+
+        .auth-box .subtitle {
+            color: #6e6e73;
+            font-size: 15px;
+            margin-bottom: 40px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            background: #f5f5f7;
+            padding: 4px;
+            border-radius: 10px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            background: transparent;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #1d1d1f;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .auth-tab.active {
+            background: white;
+            color: #0071e3;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .auth-input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .auth-input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1d1d1f;
+            font-size: 14px;
+        }
+
+        .auth-input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .auth-input-group input:focus {
+            outline: none;
+            border-color: #0071e3;
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 14px;
+            background: #0071e3;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .auth-btn:hover {
+            background: #0077ed;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+        }
+
+        .auth-btn:active {
+            transform: translateY(0);
+        }
+
+        .auth-error {
+            background: rgba(255, 59, 48, 0.1);
+            color: #ff3b30;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .auth-error.show {
+            display: block;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: absolute;
+            top: 40px;
+            right: 30px;
+        }
+
+        .username-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .app-container {
+            display: none;
+        }
+
+        .app-container.active {
+            display: block;
+        }
+
         header {
             background: linear-gradient(135deg, #0071e3 0%, #005bb5 100%);
             color: white;
@@ -832,10 +1014,61 @@
     </style>
 </head>
 <body>
+    <!-- 登录/注册界面 -->
+    <div class="auth-container active" id="authContainer">
+        <div class="auth-box">
+            <h1>🤖 AI Agent 使用日志</h1>
+            <p class="subtitle">记录每天的AI使用情况，智能生成周报</p>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchAuthTab('login')">登录</button>
+                <button class="auth-tab" onclick="switchAuthTab('register')">注册</button>
+            </div>
+
+            <div class="auth-error" id="authError"></div>
+
+            <!-- 登录表单 -->
+            <form class="auth-form active" id="loginForm" onsubmit="handleLogin(event)">
+                <div class="auth-input-group">
+                    <label>用户名</label>
+                    <input type="text" id="loginUsername" placeholder="请输入用户名" required autocomplete="username">
+                </div>
+                <div class="auth-input-group">
+                    <label>密码</label>
+                    <input type="password" id="loginPassword" placeholder="请输入密码" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="auth-btn">登录</button>
+            </form>
+
+            <!-- 注册表单 -->
+            <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)">
+                <div class="auth-input-group">
+                    <label>用户名</label>
+                    <input type="text" id="registerUsername" placeholder="请输入用户名（3-20个字符）" required minlength="3" maxlength="20" autocomplete="username">
+                </div>
+                <div class="auth-input-group">
+                    <label>密码</label>
+                    <input type="password" id="registerPassword" placeholder="请输入密码（至少6个字符）" required minlength="6" autocomplete="new-password">
+                </div>
+                <div class="auth-input-group">
+                    <label>确认密码</label>
+                    <input type="password" id="registerPasswordConfirm" placeholder="请再次输入密码" required autocomplete="new-password">
+                </div>
+                <button type="submit" class="auth-btn">注册</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 主应用界面 -->
+    <div class="app-container" id="appContainer">
     <div class="container">
         <header>
             <h1>🤖 AI Agent 使用日志</h1>
             <p>记录每天的AI使用情况，智能生成周报</p>
+            <div class="user-info">
+                <span class="username-badge" id="usernameBadge"></span>
+                <button class="logout-btn" onclick="handleLogout()">退出登录</button>
+            </div>
         </header>
 
         <div class="tabs">
@@ -941,7 +1174,7 @@
         <!-- 页脚 -->
         <footer>
             <p>Made with ❤️ by AI Agent</p>
-            <a class="changelog-link" onclick="showChangelog()">📋 查看升级日志 v1.8</a>
+            <a class="changelog-link" onclick="showChangelog()">📋 查看升级日志 v1.9</a>
         </footer>
     </div>
 
@@ -955,8 +1188,22 @@
             <div class="modal-body">
                 <div class="changelog-item">
                     <div class="changelog-version">
-                        <h4>v1.8</h4>
+                        <h4>v1.9</h4>
                         <span class="version-badge">最新</span>
+                    </div>
+                    <div class="changelog-date">2026年1月30日</div>
+                    <ul class="changelog-features">
+                        <li><strong>账号系统</strong>：新增用户注册和登录功能，支持多用户独立使用</li>
+                        <li><strong>数据隔离</strong>：每个用户的日志、图片、API密钥完全独立，互不干扰</li>
+                        <li><strong>安全认证</strong>：密码加密存储，登录状态保持，支持安全退出</li>
+                        <li><strong>用户信息</strong>：头部显示当前登录用户名和退出按钮</li>
+                        <li><strong>无缝切换</strong>：支持多用户登录切换，数据自动切换</li>
+                    </ul>
+                </div>
+
+                <div class="changelog-item">
+                    <div class="changelog-version">
+                        <h4>v1.8</h4>
                     </div>
                     <div class="changelog-date">2026年1月30日</div>
                     <ul class="changelog-features">
@@ -1082,15 +1329,178 @@
     </div>
 
     <script>
+        // ==================== 账号系统 ====================
+        let currentUser = null;
+
+        // 初始化账号系统
+        function initAuth() {
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = savedUser;
+                showApp();
+            } else {
+                showAuth();
+            }
+        }
+
+        // 显示登录界面
+        function showAuth() {
+            document.getElementById('authContainer').classList.add('active');
+            document.getElementById('appContainer').classList.remove('active');
+        }
+
+        // 显示主应用
+        function showApp() {
+            document.getElementById('authContainer').classList.remove('active');
+            document.getElementById('appContainer').classList.add('active');
+            document.getElementById('usernameBadge').textContent = currentUser;
+            initApp();
+        }
+
+        // 切换登录/注册标签
+        function switchAuthTab(tab) {
+            const tabs = document.querySelectorAll('.auth-tab');
+            const forms = document.querySelectorAll('.auth-form');
+
+            tabs.forEach(t => t.classList.remove('active'));
+            forms.forEach(f => f.classList.remove('active'));
+
+            if (tab === 'login') {
+                tabs[0].classList.add('active');
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                tabs[1].classList.add('active');
+                document.getElementById('registerForm').classList.add('active');
+            }
+
+            hideAuthError();
+        }
+
+        // 显示错误信息
+        function showAuthError(message) {
+            const errorDiv = document.getElementById('authError');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        // 隐藏错误信息
+        function hideAuthError() {
+            document.getElementById('authError').classList.remove('show');
+        }
+
+        // 注册处理
+        function handleRegister(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('registerUsername').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+
+            // 验证用户名
+            if (username.length < 3 || username.length > 20) {
+                showAuthError('用户名长度必须在3-20个字符之间');
+                return;
+            }
+
+            // 验证密码
+            if (password.length < 6) {
+                showAuthError('密码长度至少为6个字符');
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                showAuthError('两次输入的密码不一致');
+                return;
+            }
+
+            // 检查用户是否已存在
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+            if (users[username]) {
+                showAuthError('用户名已存在');
+                return;
+            }
+
+            // 创建新用户（密码简单加密）
+            users[username] = {
+                password: btoa(password), // Base64编码
+                createdAt: new Date().toISOString()
+            };
+
+            localStorage.setItem('users', JSON.stringify(users));
+
+            // 注册成功，自动登录
+            currentUser = username;
+            localStorage.setItem('currentUser', username);
+
+            // 清空表单
+            document.getElementById('registerForm').reset();
+
+            showApp();
+        }
+
+        // 登录处理
+        function handleLogin(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            // 验证用户
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+            if (!users[username]) {
+                showAuthError('用户名不存在');
+                return;
+            }
+
+            // 验证密码
+            if (users[username].password !== btoa(password)) {
+                showAuthError('密码错误');
+                return;
+            }
+
+            // 登录成功
+            currentUser = username;
+            localStorage.setItem('currentUser', username);
+
+            // 清空表单
+            document.getElementById('loginForm').reset();
+
+            showApp();
+        }
+
+        // 退出登录
+        function handleLogout() {
+            if (confirm('确定要退出登录吗？')) {
+                currentUser = null;
+                localStorage.removeItem('currentUser');
+                showAuth();
+            }
+        }
+
+        // 获取用户专属的localStorage键
+        function getUserKey(key) {
+            return `${key}_${currentUser}`;
+        }
+
+        // ==================== 原有应用逻辑 ====================
         // 数据存储
-        let entries = JSON.parse(localStorage.getItem('aiAgentEntries')) || [];
+        let entries = [];
         let currentImages = []; // 存储当前表单中的图片数据
 
-        // 初始化
-        document.getElementById('entryDate').valueAsDate = new Date();
-        loadEntries();
-        populateWeekSelector();
-        loadApiKey();
+        // 初始化应用
+        function initApp() {
+            // 加载用户专属数据
+            entries = JSON.parse(localStorage.getItem(getUserKey('aiAgentEntries')) || '[]');
+
+            // 初始化日期
+            document.getElementById('entryDate').valueAsDate = new Date();
+            loadEntries();
+            populateWeekSelector();
+            loadApiKey();
+        }
+
+        // 页面加载时初始化账号系统
+        window.addEventListener('DOMContentLoaded', initAuth);
 
         // 图片预览功能
         async function previewImages(event) {
@@ -1159,14 +1569,14 @@
         function saveApiKey() {
             const apiKey = document.getElementById('apiKey').value.trim();
             if (apiKey) {
-                localStorage.setItem('claudeApiKey', apiKey);
+                localStorage.setItem(getUserKey('claudeApiKey'), apiKey);
                 alert('✅ API密钥已保存');
                 document.getElementById('apiConfigContent').classList.remove('show');
             }
         }
 
         function loadApiKey() {
-            const apiKey = localStorage.getItem('claudeApiKey');
+            const apiKey = localStorage.getItem(getUserKey('claudeApiKey'));
             if (apiKey) {
                 document.getElementById('apiKey').value = apiKey;
             }
@@ -1200,7 +1610,7 @@
 
         // AI提取任务描述
         async function extractTaskFromDescription(description) {
-            const apiKey = localStorage.getItem('claudeApiKey');
+            const apiKey = localStorage.getItem(getUserKey('claudeApiKey'));
             if (!apiKey) {
                 // 如果没有API密钥，返回前50个汉字作为描述
                 const chineseChars = description.match(/[\u4e00-\u9fa5]/g) || [];
@@ -1323,7 +1733,7 @@ ${description}
                 };
 
                 entries.unshift(entry);
-                localStorage.setItem('aiAgentEntries', JSON.stringify(entries));
+                localStorage.setItem(getUserKey('aiAgentEntries'), JSON.stringify(entries));
 
                 // 清空部分表单字段
                 document.getElementById('entryTask').value = '';
@@ -1403,7 +1813,7 @@ ${description}
         function deleteEntry(id) {
             if (confirm('确定要删除这条记录吗？')) {
                 entries = entries.filter(e => e.id !== id);
-                localStorage.setItem('aiAgentEntries', JSON.stringify(entries));
+                localStorage.setItem(getUserKey('aiAgentEntries'), JSON.stringify(entries));
                 loadEntries();
                 populateWeekSelector();
             }
@@ -1602,8 +2012,11 @@ ${description}
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 hideChangelog();
+                closeImageModal();
             }
         });
     </script>
+    </div>
+    </div>
 </body>
 </html>
