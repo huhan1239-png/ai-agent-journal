@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据导入工具 - AI Agent Journal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #1d1d1f;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #6e6e73;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .step {
+            background: #f5f5f7;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #0071e3;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #1d1d1f;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .step-content {
+            color: #6e6e73;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box p {
+            color: #1565c0;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .warning-box p {
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .file-input-area {
+            border: 2px dashed #0071e3;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-area:hover {
+            background: rgba(0, 113, 227, 0.05);
+            border-color: #0077ed;
+        }
+
+        .file-input-area.dragover {
+            background: rgba(0, 113, 227, 0.1);
+            border-color: #0077ed;
+        }
+
+        .file-input-area input {
+            display: none;
+        }
+
+        .file-input-text {
+            color: #0071e3;
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .file-input-hint {
+            color: #6e6e73;
+            font-size: 14px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #0071e3;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            background: #0077ed;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3);
+        }
+
+        .btn:disabled {
+            background: #86868b;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #6e6e73;
+        }
+
+        .btn-secondary:hover {
+            background: #86868b;
+        }
+
+        .result {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result p {
+            color: #155724;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .error {
+            background: rgba(255, 59, 48, 0.1);
+            border-left: 4px solid #ff3b30;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .error p {
+            color: #ff3b30;
+            font-size: 14px;
+        }
+
+        .preview {
+            background: #f5f5f7;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .preview.show {
+            display: block;
+        }
+
+        .preview-item {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        .preview-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📥 数据导入工具</h1>
+        <p class="subtitle">将本地导出的数据导入到当前浏览器</p>
+
+        <div class="info-box">
+            <p><strong>使用说明：</strong></p>
+            <p>1. 在本地浏览器导出数据（导出当前用户数据）</p>
+            <p>2. 在 Vercel 网站上打开此页面</p>
+            <p>3. 上传导出的 JSON 文件</p>
+            <p>4. 选择要导入到哪个用户账号下</p>
+        </div>
+
+        <div class="warning-box">
+            <p><strong>⚠️ 注意：</strong>如果目标用户已有数据，导入将会合并（不会覆盖现有数据）</p>
+        </div>
+
+        <div class="step">
+            <div class="step-title">步骤 1: 选择导出的数据文件</div>
+            <div class="file-input-area" id="fileInputArea" onclick="document.getElementById('fileInput').click()">
+                <input type="file" id="fileInput" accept=".json" onchange="handleFileSelect(event)">
+                <div class="file-input-text">📁 点击选择文件或拖拽文件到这里</div>
+                <div class="file-input-hint">支持 JSON 格式的导出文件</div>
+            </div>
+            <div class="preview" id="preview"></div>
+        </div>
+
+        <div class="step">
+            <div class="step-title">步骤 2: 选择目标用户</div>
+            <div class="step-content">
+                <label style="display: block; margin-bottom: 10px; font-weight: 500; color: #1d1d1f;">
+                    导入到用户：
+                </label>
+                <input type="text" id="targetUsername" placeholder="输入用户名（例如：huhan）"
+                       style="width: 100%; padding: 12px 16px; border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 10px; font-size: 15px;">
+                <p style="color: #6e6e73; font-size: 13px; margin-top: 8px;">
+                    如果用户不存在，会自动创建（需要设置密码）
+                </p>
+            </div>
+        </div>
+
+        <div class="step" id="passwordStep" style="display: none;">
+            <div class="step-title">步骤 3: 设置用户密码</div>
+            <div class="step-content">
+                <label style="display: block; margin-bottom: 10px; font-weight: 500; color: #1d1d1f;">
+                    密码（至少6个字符）：
+                </label>
+                <input type="password" id="userPassword" placeholder="为新用户设置密码"
+                       style="width: 100%; padding: 12px 16px; border: 1px solid rgba(0, 0, 0, 0.12); border-radius: 10px; font-size: 15px;">
+            </div>
+        </div>
+
+        <button class="btn" id="importBtn" onclick="importData()" disabled>开始导入</button>
+        <button class="btn btn-secondary" onclick="openJournal()">返回日志系统</button>
+
+        <div class="result" id="result"></div>
+        <div class="error" id="error"></div>
+    </div>
+
+    <script>
+        let selectedData = null;
+
+        // 拖拽上传
+        const fileInputArea = document.getElementById('fileInputArea');
+
+        fileInputArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileInputArea.classList.add('dragover');
+        });
+
+        fileInputArea.addEventListener('dragleave', () => {
+            fileInputArea.classList.remove('dragover');
+        });
+
+        fileInputArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileInputArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // 文件选择
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        // 处理文件
+        function handleFile(file) {
+            if (!file.name.endsWith('.json')) {
+                showError('请选择 JSON 格式的文件');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    selectedData = data;
+
+                    // 显示预览
+                    let previewHTML = '<div class="step-title">文件内容预览</div>';
+                    previewHTML += `<div class="preview-item"><strong>用户名：</strong>${data.username || '未指定'}</div>`;
+                    previewHTML += `<div class="preview-item"><strong>日志记录：</strong>${data.entries ? data.entries.length : 0} 条</div>`;
+                    previewHTML += `<div class="preview-item"><strong>导出时间：</strong>${data.exportDate || '未知'}</div>`;
+
+                    document.getElementById('preview').innerHTML = previewHTML;
+                    document.getElementById('preview').classList.add('show');
+
+                    // 自动填充用户名
+                    if (data.username) {
+                        document.getElementById('targetUsername').value = data.username;
+                    }
+
+                    // 启用导入按钮
+                    document.getElementById('importBtn').disabled = false;
+
+                    hideError();
+                } catch (error) {
+                    showError('文件格式错误，请确保是有效的 JSON 文件');
+                    selectedData = null;
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 检查用户名变化
+        document.getElementById('targetUsername').addEventListener('input', function() {
+            const username = this.value.trim();
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+
+            if (username && !users[username]) {
+                document.getElementById('passwordStep').style.display = 'block';
+            } else {
+                document.getElementById('passwordStep').style.display = 'none';
+            }
+        });
+
+        // 导入数据
+        function importData() {
+            if (!selectedData) {
+                showError('请先选择要导入的文件');
+                return;
+            }
+
+            const targetUsername = document.getElementById('targetUsername').value.trim();
+
+            if (!targetUsername) {
+                showError('请输入目标用户名');
+                return;
+            }
+
+            if (targetUsername.length < 3 || targetUsername.length > 20) {
+                showError('用户名长度必须在3-20个字符之间');
+                return;
+            }
+
+            // 检查用户是否存在
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+
+            if (!users[targetUsername]) {
+                const password = document.getElementById('userPassword').value;
+
+                if (!password) {
+                    showError('请为新用户设置密码');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    showError('密码长度至少为6个字符');
+                    return;
+                }
+
+                // 创建新用户
+                users[targetUsername] = {
+                    password: btoa(password),
+                    createdAt: new Date().toISOString()
+                };
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+
+            // 导入数据
+            const existingEntries = JSON.parse(localStorage.getItem(`aiAgentEntries_${targetUsername}`) || '[]');
+            const newEntries = selectedData.entries || [];
+
+            // 合并数据（去重）
+            const allEntries = [...existingEntries];
+            const existingIds = new Set(existingEntries.map(e => e.id));
+
+            newEntries.forEach(entry => {
+                if (!existingIds.has(entry.id)) {
+                    allEntries.push(entry);
+                }
+            });
+
+            // 保存数据
+            localStorage.setItem(`aiAgentEntries_${targetUsername}`, JSON.stringify(allEntries));
+
+            // 如果有 API 密钥
+            if (selectedData.hasApiKey && selectedData.apiKey) {
+                localStorage.setItem(`claudeApiKey_${targetUsername}`, selectedData.apiKey);
+            }
+
+            // 显示结果
+            const newCount = allEntries.length - existingEntries.length;
+            let resultHTML = '<p><strong>✅ 导入成功！</strong></p>';
+            resultHTML += `<p>• 目标用户：${targetUsername}</p>`;
+            resultHTML += `<p>• 导入记录：${newCount} 条新记录</p>`;
+            resultHTML += `<p>• 总记录数：${allEntries.length} 条</p>`;
+            if (!users[targetUsername]) {
+                resultHTML += `<p>• 新用户已创建</p>`;
+            }
+            resultHTML += `<p><br>现在可以返回日志系统并使用用户名 "${targetUsername}" 登录</p>`;
+
+            document.getElementById('result').innerHTML = resultHTML;
+            document.getElementById('result').classList.add('show');
+            document.getElementById('error').classList.remove('show');
+
+            // 禁用导入按钮
+            document.getElementById('importBtn').disabled = true;
+        }
+
+        // 显示错误
+        function showError(message) {
+            document.getElementById('error').innerHTML = `<p>${message}</p>`;
+            document.getElementById('error').classList.add('show');
+            document.getElementById('result').classList.remove('show');
+        }
+
+        // 隐藏错误
+        function hideError() {
+            document.getElementById('error').classList.remove('show');
+        }
+
+        // 返回日志系统
+        function openJournal() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
